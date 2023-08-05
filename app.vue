@@ -1,21 +1,15 @@
 <template>
   <div>
-    <NuxtWelcome class="debug"/>
+    <NuxtPage />
   </div>
 </template>
 <script setup>
-import { enableToast } from '~/plugins/toast'
-
-const { $toast } = useNuxtApp()
-
-onMounted(() => {
-  enableToast()
-
-  let hello = $toast.success('Hello World')
-
-  // force dismiss hello
-  // hello.dismiss()
-})
+// import { enableToast } from '~/plugins/toast'
+// const { $toast } = useNuxtApp()
+// onMounted(() => {
+//   enableToast()
+//   let hello = $toast.success('Hello World')
+// })
 </script>
 <style>
 /* use Figtree font for everything */
