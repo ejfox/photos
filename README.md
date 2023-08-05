@@ -1,16 +1,22 @@
-# EJ Fox Nuxt 3 Starter
+# Nuxt + Cloudinary Photo Gallery App
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/981b9e46-6878-4ddb-a716-2713c5f3e412/deploy-status)](https://app.netlify.com/sites/ejfox-nuxt-template/deploys)
+This README document describes the development of a custom media organizing and publishing application using bash scripts, Apple Automator, and Cloudinary on a Nuxt.js framework.
 
-## What's different from the standard Nuxt 3 starter?
-- Tachyons 🌟 
-- VueUse 🔧 
-- Vueuse motion 🌈 
-- OpenAI plugin 🧠 
-- Toasts 🍞 
-- Pinia store 🏬 
-- Helpers file 🔨 
-- Google fonts 🖋️ 
+## What is this project about?
+
+This project arose from the author's need for a better way to organize and publish media files. Frustrated with existing solutions, a unique process of organizing and publishing photos using existing tools and some custom scripting was developed. The project focuses on an organized file system that starts with the `~/dump/` directory where all new media is initially saved and subsequently moved to organized directories in `~/media/` and finally uploaded to Cloudinary.
+
+## The Project Process:
+
+1. **Import SD Card to `~/dump/`**: Apple Automator and bash scripting are used to handle the importation of files from SD cards into the `~/dump/` directory. Only specific file types (JPEG, MP3, MP4, RAF, WAV) are selected for copying.
+2. **Organize `~/dump/` into `~/media/`:** When `~/dump/` grows too large, another script is run which moves everything in `~/dump/` into organized sub-folders in `~/media/`, based on their creation date and file type. Log files of the operations are created and stored in the same directory.
+3. **Upload to Cloudinary:** After the local organization is completed, the media files tagged in green are uploaded to Cloudinary using a bash script that detects the tags, navigates to the correct directory, and executes the upload command.
+
+## Web Interface with Nuxt.js:
+
+The files stored on Cloudinary are fetched back for viewing on a web interface built with Nuxt.js. Server-side coding is implemented to securely access Cloudinary with private keys and retrieve the media. It also features a Nuxt Server API which fetches the latest photos when the endpoint `/api/latest-photos` is accessed. 
+
+Overall, this is a fully functional and efficient media organizing system that follows the author's personalized approach to manage a large collection of files and present them in an organized and pleasant web gallery built on Nuxt.js.
 
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
