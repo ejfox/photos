@@ -12,16 +12,18 @@ export default defineNuxtConfig({
       ],
     },
   },
-  ssr: false, // for netlify deploy
-  devtools: { enabled: true },
+  // ssr: false, // for netlify deploy
+  // devtools: { enabled: true },
   css: [
-    'tachyons/css/tachyons.css',
+    // 'tachyons/css/tachyons.css',
     'vue-toast-notification/dist/theme-default.css',
   ],
   modules: [
     // '@nuxtjs/supabase',
     '@vueuse/nuxt',
     '@pinia/nuxt',
+    '@vueuse/nuxt',
+    '@nuxt/ui',
     '@vueuse/motion/nuxt',
     ['@nuxtjs/google-fonts', {
       families: {

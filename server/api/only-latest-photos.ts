@@ -1,73 +1,55 @@
 // server/api/latest-photos.ts
-import { createClient } from '@supabase/supabase-js'
-import { v2 as cloudinary } from 'cloudinary'
+import { defineEventHandler } from 'h3';
+import { v2 as cloudinary } from 'cloudinary';
 
+// Configure Cloudinary with your Environment Variables
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
-})
+});
 
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+console.log("Cloudinary configuration setup.");
 
 export default defineEventHandler(async (event) => {
   try {
-    // Fetch the latest entry from the images table
-    const latestImage = await supabase
-      .from('images')
-      .select('service_created_at')
-      .order('service_created_at', { ascending: false })
-      .limit(1)
+    console.log("Fetching the last 100 photos uploaded to Cloudinary...");
 
-    
-    let timestamp
-    if(latestImage?.data[0]) {
-    // Convert the service_created_at date to a timestamp
-      timestamp = new Date(latestImage.data[0].service_created_at).getTime()
-    } else {
-      // If there is no latestImage, set the timestamp to 0
-      timestamp = 0
-    }
-
-    // Fetch images from Cloudinary that were uploaded after the timestamp
+    // Fetch the last 100 images uploaded
     const result = await cloudinary.search
-      .expression(`resource_type:image AND created_at>${timestamp}`)
-      .execute()
+      .expression('resource_type:image')
+      .sort_by('uploaded_at', 'desc')
+      .max_results(100)
+      .execute();
+  
+    // Filter out images that have 'screenshot' or 'private' tags
+    const filteredResources = result.resources.filter(resource => {
+      const tags = resource.tags || []; // Ensure tags is an array, even if undefined
+      const public_id = resource.public_id || ''; // Ensure public_id is a string, even if undefined
+      return !(
+        tags.includes('screenshot') ||
+        tags.includes('private') ||
+        public_id.includes('Screenshot') ||
+        public_id.includes('screenshot')
+      );
+    });
 
-    if (result.resources.length > 0) {
-      console.log('Upserting images ', result.resources.length)
-      for (let resource of result.resources) {
-        await supabase
-          .from('images')
-          .upsert(
-            { 
-              service_created_at: resource.created_at,
-              type: 'image',
-              service_id: resource.public_id,
-              href: resource.secure_url,
-            },
-            {
-              onConflict: 'href',
-            },
-          )
-      }
-    }
+    // Log results
+    console.log('Number of images eligible for return: ', filteredResources.length);
 
-    const { data, error } = await supabase
-      .from('images')            
-      .select('*')
-      // sort by service_created_at in descending order
-      .order('service_created_at', { ascending: false })
+    // Create a simplified collection of information about the photos to send back to the client
+    const photos = filteredResources.map(resource => ({
+      href: resource.secure_url,
+      public_id: resource.public_id,
+      uploaded_at: resource.created_at,
+      // potentially add other relevant fields here
+    }));
 
-    if (error) {
-      console.error(error)
-      return []
-    }
-    return data
+    return photos;
+
   } catch (err) {
-    console.error(err)
-    return []
+    console.error("Error fetching photos from Cloudinary: ", err);
+    // Return an HTTP error code here for better error handling
+    return { error: 'An error occurred while fetching photos.' };
   }
-})
+});
