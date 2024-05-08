@@ -1,38 +1,29 @@
 <template>
   <div class="dark:bg-black dark:text-white">
-    <div>
-      <!-- make a v-model input for numPhotos -->
-      <!-- <input type="number" v-model="numPhotos" class="p-2"> -->
 
-            <!-- make a v-model dropdown for cropOptions -->
-      <select v-model="cropType" class="p-2">
-        <option v-for="option in cropOptions" :selected="option.value === cropType" :value="option.value">{{ option.label
-        }}</option>
-      </select>
-    </div>
-
-    <div class="flex flex-wrap p-2 lg:p-4">
-      <div v-for="photo in photos" ref="photoRef" class="w-1/3 flex-item p-0 lg:p-1">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-2 lg:p-4">
+      <div v-for="photo in photos" ref="photoRef" class="flex-item p-0 lg:p-1">
         <LibraryPhoto :photo="photo" :cropType="cropType" />
+        <!-- <pre>{{photo}}</pre> -->
       </div>
     </div>
-
-  
-
   </div>
 </template>
 <script setup>
-const numPhotos = ref(250)
+const filterScreenshots = ref(true)
 
 
 const { data: photos } = await useFetch('/api/cloudinary', {
   method: 'POST',
-  body: JSON.stringify({ numPhotos: numPhotos.value })
+  body: JSON.stringify({ 
+    filterOutScreenshots: false, 
+    onlyScreenshots: true 
+  })
 })
 
 const photoRef = ref([])
 
-const cropType = ref('fill')
+const cropType = ref('pad')
 
 const cropOptions = [
   { label: 'fill', value: 'fill' },

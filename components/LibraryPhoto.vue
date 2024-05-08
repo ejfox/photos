@@ -1,7 +1,8 @@
 <template>
-  <div @click="copy(`![${photo.service_id}](${photo.href})`)"
+  <div @click="copy(`![${photo.public_id}](${photo.href})`)"
     :class="['cursor-pointer transition-opacity duration-500', copied ? 'opacity-50' : 'opacity-100']">
-    <img :src="cloudinaryThumb(photo.href)" :alt="photo.service_id" />
+    <img :src="cloudinaryThumb(photo.href)" :alt="photo.public_id" />
+    <!-- <pre class="overflow-auto text-xs monospace">{{photo}}</pre> -->
   </div>
 </template>
 
@@ -17,7 +18,7 @@ const props = defineProps({
 
 const cropType = toRef(props, 'cropType')
 
-const { text, copy, copied, isSupported } = useClipboard()
+const { copy, copied } = useClipboard()
 
 // const parentEl = useParentElement()
 // const { width } = useElementSize(parentEl)

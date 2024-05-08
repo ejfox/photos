@@ -12,26 +12,37 @@ cloudinary.config({
 console.log("Cloudinary configuration setup.");
 
 export default defineEventHandler(async (event) => {
+  // read the body from the event
+  const body = await readBody(event);
+  console.log(body)
+
+  const numPhotos = +body.numPhotos || 420;
+  const filterOutScreenshots = body.filterOutScreenshots !== undefined ? body.filterOutScreenshots : true;
+  const onlyScreenshots = body.onlyScreenshots !== undefined ? body.onlyScreenshots : false;
+
+  // log out the config options
+  console.log('numPhotos: ', numPhotos);
+  console.log('filterOutScreenshots: ', filterOutScreenshots);
+  console.log('onlyScreenshots: ', onlyScreenshots);
+  
+
   try {
-    console.log("Fetching the last 100 photos uploaded to Cloudinary...");
+    console.log(`Fetching the last ${numPhotos} photos uploaded to Cloudinary...`);
 
     // Fetch the last 100 images uploaded
     const result = await cloudinary.search
       .expression('resource_type:image')
       .sort_by('uploaded_at', 'desc')
-      .max_results(100)
-      .execute();
+      .with_field('image_metadata')
+      .max_results(numPhotos)
+      .execute();   
   
     // Filter out images that have 'screenshot' or 'private' tags
-    const filteredResources = result.resources.filter(resource => {
+    let filteredResources = result.resources.filter(resource => {
       const tags = resource.tags || []; // Ensure tags is an array, even if undefined
       const public_id = resource.public_id || ''; // Ensure public_id is a string, even if undefined
-      return !(
-        tags.includes('screenshot') ||
-        tags.includes('private') ||
-        public_id.includes('Screenshot') ||
-        public_id.includes('screenshot')
-      );
+      const isScreenshot = tags.includes('screenshot') || public_id.includes('Screenshot') || public_id.includes('screenshot');
+      return (onlyScreenshots && isScreenshot) || (filterOutScreenshots && !isScreenshot) || tags.includes('private');
     });
 
     // Log results
@@ -43,6 +54,7 @@ export default defineEventHandler(async (event) => {
       public_id: resource.public_id,
       uploaded_at: resource.created_at,
       // potentially add other relevant fields here
+      ...resource
     }));
 
     return photos;
