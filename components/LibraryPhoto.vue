@@ -37,6 +37,23 @@
         <img src="/cam_cybershot.png" class="h-16 w-auto" />
       </div>
     </div>
+
+    <pre class="h-32 w-full overflow-auto text-xs monospace">{{ photo }}</pre>
+
+    <!-- <button @click="markForPhotoBlog"
+      :class="['rounded-sm mt-2 px-4 py-2', photo.tags && photo.tags.includes('photo-blog') ? 'bg-blue-500 text-white' : 'bg-gray-500 text-white']">
+      {{ photo.tags && photo.tags.includes('photo-blog') ? 'Remove from Photo Blog' : 'Add to Photo Blog' }}
+    </button> -->
+
+    <button v-if="photo.tags && photo.tags.includes('photo-blog')" @click="removePhotoblogTag"
+      class="rounded-sm mt-2 px-4 py-2 bg-blue-500 text-white">
+      Remove from Photo Blog
+    </button>
+
+    <button v-else @click="markForPhotoBlog" class="rounded-sm mt-2 px-4 py-2 bg-gray-500 text-white">
+      Add to Photo Blog
+    </button>
+
   </div>
 </template>
 
@@ -91,6 +108,50 @@ async function fetchExifData() {
   } catch (err) {
     console.error('Error fetching EXIF data:', err)
     exifData.value = 'Error fetching EXIF data'
+  }
+}
+
+async function markForPhotoBlog() {
+  console.log('Marking photo for photo blog:', props.photo.public_id)
+  try {
+    const { data, pending, error, refresh } = await useFetch('/api/cloudinary-add-tag', {
+      method: 'POST',
+      body: {
+        resourceId: props.photo.public_id,
+        tag: 'photo-blog',
+      },
+    })
+
+    if (error.value) {
+      console.error('Error marking photo for photo blog:', error.value)
+    } else if (data.value && data.value.success) {
+      // Update the photo metadata in the component
+      props.photo.metadata = data.value.result.metadata
+    }
+  } catch (err) {
+    console.error('Error marking photo for photo blog:', err)
+  }
+}
+
+async function removePhotoblogTag() {
+  console.log('Removing photo from photo blog:', props.photo.public_id)
+  try {
+    const { data, pending, error, refresh } = await useFetch('/api/cloudinary-remove-tag', {
+      method: 'POST',
+      body: {
+        resourceId: props.photo.public_id,
+        tag: 'photo-blog',
+      },
+    })
+
+    if (error.value) {
+      console.error('Error removing photo from photo blog:', error.value)
+    } else if (data.value && data.value.success) {
+      // Update the photo metadata in the component
+      props.photo.metadata = data.value.result.metadata
+    }
+  } catch (err) {
+    console.error('Error removing photo from photo blog:', err)
   }
 }
 </script>
