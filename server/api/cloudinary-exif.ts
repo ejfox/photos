@@ -12,6 +12,10 @@ console.log("Cloudinary configuration setup.");
 
 // Convert raw exposure time into standard photographic format
 function convertExposureTime(exposureTime) {
+  if (!exposureTime) {
+    return "";
+  }
+
   const [numerator, denominator] = exposureTime.split("/");
   const seconds = parseFloat(numerator) / parseFloat(denominator);
 
@@ -25,12 +29,20 @@ function convertExposureTime(exposureTime) {
 }
 
 function convertAperture(aperture) {
+  if (!aperture) {
+    return "";
+  }
+
   const [numerator, denominator] = aperture.split("/");
   const fNumber = parseFloat(numerator) / parseFloat(denominator);
   return `f/${fNumber.toFixed(1)}`;
 }
 
 function convertFocalLength(focalLength) {
+  if (!focalLength) {
+    return "";
+  }
+
   const [numerator, denominator] = focalLength.split("/");
   const millimeters = parseFloat(numerator) / parseFloat(denominator);
   return `${millimeters} mm`;
