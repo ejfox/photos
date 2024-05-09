@@ -70,9 +70,12 @@ export default defineEventHandler(async (event) => {
 
     // Convert specific EXIF values to human-readable format
     const humanReadableExifData = {
-      exposure: convertExposureTime(exifData.ExposureTime),
-      aperture: convertAperture(exifData.FNumber),
-      focalLength: convertFocalLength(exifData.FocalLength),
+      // exposure: convertExposureTime(exifData.ExposureTime),
+      // aperture: convertAperture(exifData.FNumber),
+      // focalLength: convertFocalLength(exifData.FocalLength),
+      exposure: exifData.ExposureTime,
+      aperture: exifData.FNumber,
+      focalLength: exifData.FocalLength,
       iso: exifData.PhotographicSensitivity,
       // Add more conversions as needed
       make: exifData.Make,
