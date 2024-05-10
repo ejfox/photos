@@ -91,6 +91,7 @@ export default defineEventHandler(async (event) => {
       exposure: convertExposureTime(exifData.ExposureTime),
       aperture: convertAperture(exifData.FNumber),
       focalLength: convertFocalLength(exifData.FocalLength),
+      caption: exifData?.ImageDescription || "",
       // exposure: exifData.ExposureTime,
       // aperture: exifData.FNumber,
       // focalLength: exifData.FocalLength,

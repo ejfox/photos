@@ -4,7 +4,7 @@
 
     <div class="photo-list flex flex-wrap px-2 lg:px-4">
       <div v-for="photo in photos" ref="photoRef"
-        class="photo-container mx-auto shadow-lg snap-start snap-always bg-black dark:bg-white overflow-hidden"
+        class="photo-container mx-auto snap-start snap-always bg-white dark:bg-black overflow-hidden"
         :style="randomizedPhotoStyle(photo)">
         <NuxtLink :to="`/${photo?.public_id}`">
           <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" class="" />
@@ -44,14 +44,15 @@ function randomizedPhotoStyle(photo) {
   // const randomX = Math.floor(Math.random() * 100)
   // const randomY = Math.floor(Math.random() * 100)  
 
-  const maxOffset = 26
+  const maxOffsetY = 26
+  const maxOffsetX = 12
   const maxAngle = 2
 
   // we can do a much better job with chance.js
   const randomAngle = chance.integer({ min: -maxAngle, max: maxAngle })
-  const randomX = chance.floating({ min: -maxOffset, max: maxOffset })
-  const randomY = chance.floating({ min: -maxOffset, max: maxOffset })
-  const scale = chance.floating({ min: 0.96, max: 1.06 })
+  const randomX = chance.floating({ min: -maxOffsetX, max: maxOffsetX })
+  const randomY = chance.floating({ min: -maxOffsetY, max: maxOffsetY })
+  const scale = chance.floating({ min: 0.96, max: 1.072 })
   // console.log({ randomAngle, randomX, randomY })
 
   const skewZ = chance.floating({ min: -maxAngle * 0.5, max: maxAngle * 0.5 })
@@ -66,6 +67,9 @@ function randomizedPhotoStyle(photo) {
     transform: `translate(${randomX}px, ${randomY}px) rotate(${randomAngle}deg) scale(${scale})`,
   }
 }
+
+
+
 </script>
 <style>
 .dark a {
@@ -130,11 +134,11 @@ button {
 
 /* invert the z-index of the photo-list children */
 .photo-list>* {
-  z-index: -1;
+  z-index: 1;
 }
 
 /* invert the z-index of the photo-list children */
 .photo-list>*:nth-child(odd) {
-  z-index: 1;
+  z-index: 2;
 }
 </style>

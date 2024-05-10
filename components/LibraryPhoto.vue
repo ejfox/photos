@@ -4,7 +4,7 @@
 
 
     <img :src="cloudinaryThumb(imageUrl)" :alt="photo.public_id"
-      class="w-full h-auto border-black dark:border-white border-4 mx-auto" />
+      class="cloudinary-img w-full h-auto border-black dark:border-white border-4 mx-auto my-0" />
 
   </div>
 </template>
@@ -94,6 +94,7 @@ function cloudinaryThumb(rawHref) {
     return rawHref.replace('upload/', `upload/w_${width.value}/dpr_auto/`)
   }
 }
+
 const { data, pending, error, refresh } = useAsyncData(async () => {
   return await fetch('/api/cloudinary-exif', {
     method: 'POST',
@@ -101,11 +102,18 @@ const { data, pending, error, refresh } = useAsyncData(async () => {
   })
 })
 
+
 </script>
 
 <style scoped>
-img {
+/* img {
   max-height: 88vh;
   width: auto;
+} */
+
+.cloudinary-img {
+  max-height: 88vh;
+  width: auto;
+  border: 0.5vw solid black;
 }
 </style>
