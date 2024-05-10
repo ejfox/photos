@@ -1,5 +1,6 @@
 <template>
-  <div class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y snap-mandatory xl:snap-proximity">
+  <div
+    class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y snap-mandatory xl:snap-proximity overflow-x-hidden py-8 lg:py-24">
 
     <div class="flex flex-wrap px-2 lg:px-4 ">
       <div v-for="photo in photos" ref="photoRef" class="photo-container mx-auto shadow-lg snap-start snap-always"
@@ -11,8 +12,10 @@
 
     </div>
 
-
-
+    <a href="https://ejfox.com" class="block p-2 lg:p-8">
+      <img src="/handdrawn__MadeWithLove.svg" class="snap-start snap-center dark:invert mx-auto my-32"
+        alt="Made with love" />
+    </a>
   </div>
 </template>
 <script setup>
