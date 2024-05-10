@@ -2,20 +2,20 @@
   <div
     class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y snap-mandatory xl:snap-proximity overflow-x-hidden py-8 lg:py-24">
 
-    <div class="flex flex-wrap px-2 lg:px-4 ">
-      <div v-for="photo in photos" ref="photoRef" class="photo-container mx-auto shadow-lg snap-start snap-always"
+    <div class="photo-list flex flex-wrap px-2 lg:px-4">
+      <div v-for="photo in photos" ref="photoRef"
+        class="photo-container mx-auto shadow-lg snap-start snap-always bg-black dark:bg-white overflow-hidden"
         :style="randomizedPhotoStyle(photo)">
         <NuxtLink :to="`/${photo?.public_id}`">
           <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" class="" />
         </NuxtLink>
       </div>
 
-    </div>
+      <a href="https://ejfox.com" class="block p-2 lg:p-8">
+        <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto my-8 lg:my-32" alt="Made with love" />
+      </a>
 
-    <a href="https://ejfox.com" class="block p-2 lg:p-8">
-      <img src="/handdrawn__MadeWithLove.svg" class="snap-start snap-center dark:invert mx-auto my-32"
-        alt="Made with love" />
-    </a>
+    </div>
   </div>
 </template>
 <script setup>
@@ -44,20 +44,26 @@ function randomizedPhotoStyle(photo) {
   // const randomX = Math.floor(Math.random() * 100)
   // const randomY = Math.floor(Math.random() * 100)  
 
-  const maxOffset = 24
-  const maxAngle = 1.33
+  const maxOffset = 26
+  const maxAngle = 2
 
   // we can do a much better job with chance.js
-  const randomAngle = chance.floating({ min: -maxAngle, max: maxAngle })
-  const randomX = chance.integer({ min: -maxOffset, max: maxOffset })
-  const randomY = chance.integer({ min: -maxOffset, max: maxOffset })
+  const randomAngle = chance.integer({ min: -maxAngle, max: maxAngle })
+  const randomX = chance.floating({ min: -maxOffset, max: maxOffset })
+  const randomY = chance.floating({ min: -maxOffset, max: maxOffset })
+  const scale = chance.floating({ min: 0.96, max: 1.06 })
+  // console.log({ randomAngle, randomX, randomY })
 
   const skewZ = chance.floating({ min: -maxAngle * 0.5, max: maxAngle * 0.5 })
+  if (chance.bool({ likelihood: 0.2 })) return {}
+  if (chance.bool({ likelihood: 0.1 })) return {
+    transform: `rotate(${randomAngle}deg) skew(${skewZ}deg)`,
+  }
   return {
     // transform: `rotate(${randomAngle}deg) skew(${skewZ}deg)`,
     // transform: `rotate(${randomAngle}deg)`, // no skew no translate
-    transform: `translate(${randomX}px, ${randomY}px) rotate(${randomAngle}deg)`,
-
+    // transform: `translate(${randomX}px, ${randomY}px) rotate(${randomAngle}deg)`,
+    transform: `translate(${randomX}px, ${randomY}px) rotate(${randomAngle}deg) scale(${scale})`,
   }
 }
 </script>
@@ -114,5 +120,21 @@ button {
 .photo-container:hover {
   /* transform: rotate(0deg) scale(1) !important; */
   /* transform: scale(1.005) !important; */
+}
+
+.photo-container:active {
+  transform: rotate(0deg) scale(1.01) !important;
+  /* transform: scale(1.005) !important; */
+}
+
+
+/* invert the z-index of the photo-list children */
+.photo-list>* {
+  z-index: -1;
+}
+
+/* invert the z-index of the photo-list children */
+.photo-list>*:nth-child(odd) {
+  z-index: 1;
 }
 </style>

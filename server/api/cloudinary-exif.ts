@@ -56,8 +56,10 @@ function convertFocalLength(focalLength) {
   }
 
   const [numerator, denominator] = focalLength.split("/");
-  const millimeters = parseFloat(numerator) / parseFloat(denominator);
-  return `${millimeters} mm`;
+  const millimeters = Math.round(
+    parseFloat(numerator) / parseFloat(denominator)
+  );
+  return `${millimeters}mm`;
 }
 
 export default defineEventHandler(async (event) => {

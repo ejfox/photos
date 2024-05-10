@@ -4,7 +4,7 @@
 
 
     <img :src="cloudinaryThumb(imageUrl)" :alt="photo.public_id"
-      class="w-full h-auto border-black dark:border-white border-8 mx-auto" />
+      class="w-full h-auto border-black dark:border-white border-4 mx-auto" />
 
   </div>
 </template>
@@ -105,7 +105,7 @@ const { data, pending, error, refresh } = useAsyncData(async () => {
 
 <style scoped>
 img {
-  max-height: 90vh;
+  max-height: 88vh;
   width: auto;
 }
 </style>
