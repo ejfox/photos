@@ -9,9 +9,9 @@
         <img src="/cam_cybershot.png" class="h-16 w-auto" />
       </div>
     </div>
-    <div>{{ exifData.make }} {{ exifData.model }}</div>
-    <div>{{ exifData.aperture }} f/{{ exifData.focalLength }}</div>
-    <div>{{ exifData.exposure }} at ISO {{ exifData.iso }}</div>
+    <div>{{ exifData?.make }} {{ exifData?.model }}</div>
+    <div>{{ exifData?.aperture }} f/{{ exifData?.focalLength }}</div>
+    <div>{{ exifData?.exposure }} at ISO {{ exifData?.iso }}</div>
     <!-- <div>{{ exifData.date }}</div> -->
     <!-- <div>{{ formatDateTime(exifData.date) }}</div> -->
 
