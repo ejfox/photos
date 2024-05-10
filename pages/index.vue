@@ -1,8 +1,8 @@
 <template>
-  <div class="dark:bg-black dark:text-white min-h-screen">
+  <div class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y snap-mandatory xl:snap-proximity">
 
-    <div class="flex flex-wrap px-2 lg:px-4">
-      <div v-for="photo in photos" ref="photoRef" class="photo-container px-4 mx-auto shadow-lg"
+    <div class="flex flex-wrap px-2 lg:px-4 ">
+      <div v-for="photo in photos" ref="photoRef" class="photo-container mx-auto shadow-lg snap-start snap-always"
         :style="randomizedPhotoStyle(photo)">
         <NuxtLink :to="`/${photo?.public_id}`">
           <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" class="" />
@@ -31,13 +31,6 @@ const { data: photos } = await useFetch('/api/cloudinary', {
 })
 
 const photoRef = ref([])
-
-const cropType = ref('fill')
-
-const cropOptions = [
-  { label: 'fill', value: 'fill' },
-  { label: 'pad', value: 'pad' }
-]
 
 function randomizedPhotoStyle(photo) {
   const chance = new Chance()
