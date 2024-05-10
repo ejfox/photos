@@ -45,25 +45,11 @@
       }
 
     -->
-      <div class="photo-metadata">
-        <div class="exif-camera">
-          <div v-if="exifData.model === 'X-Pro3'">
-            <img src="/cam_xpro3.png" class="h-16 w-auto" />
-          </div>
 
-          <div v-if="exifData.model === 'DSC-TX5'">
-            <img src="/cam_cybershot.png" class="h-16 w-auto" />
-          </div>
-        </div>
-        <div>{{ exifData.make }} {{ exifData.model }}</div>
-        <div>{{ exifData.aperture }} f/{{ exifData.focalLength }}</div>
-        <div>{{ exifData.exposure }} at ISO {{ exifData.iso }}</div>
-        <div>{{ exifData.date }}</div>
-
-      </div>
 
 
     </div>
+    <PhotoMetadata :photo="photo" />
 
     <!-- <pre class="h-32 w-full overflow-auto text-xs monospace">{{ photo.exifData }}</pre> -->
 
@@ -151,14 +137,6 @@ function cloudinaryThumb(rawHref) {
     return rawHref.replace('upload/', `upload/w_${width}/dpr_auto/`)
   }
 }
-
-// const { data, pending, error, refresh } = await useFetch('/api/cloudinary-exif', {
-//   lazy: true,
-//   method: 'POST',
-//   body: { resourceId: props.photo.public_id },
-// })
-
-// use useAsyncData instead
 const { data, pending, error, refresh } = useAsyncData(async () => {
   return await fetch('/api/cloudinary-exif', {
     method: 'POST',
@@ -166,25 +144,6 @@ const { data, pending, error, refresh } = useAsyncData(async () => {
   })
 })
 
-// async function fetchExifData() {
-//   await refresh()
-//   console.log('fetching EXIF data for:', props.photo.public_id)
-//   try {
-
-
-//     console.log('fetchExifData:', data.value, pending.value, error.value)
-
-//     if (error.value) {
-//       console.error('Error fetching EXIF data:', error.value)
-//       exifData.value = 'Error fetching EXIF data'
-//     } else if (data.value) {
-//       exifData.value = data.value.humanReadableExifData || 'No EXIF data available'
-//     }
-//   } catch (err) {
-//     console.error('Error fetching EXIF data:', err)
-//     exifData.value = 'Error fetching EXIF data'
-//   }
-// }
 
 function convertExifCoordinates(exifCoordinates, ref) {
   const [degrees, minutes, seconds] = exifCoordinates.split(', ').map(part => {
@@ -209,4 +168,9 @@ const photoLng = computed(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+img {
+  max-height: 90vh;
+  width: auto;
+}
+</style>
