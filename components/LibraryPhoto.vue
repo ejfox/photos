@@ -3,59 +3,8 @@
 
 
 
-    <img :src="cloudinaryThumb(imageUrl)" :alt="photo.public_id" />
-    <!-- <pre v-if="exifData" class="overflow-auto text-xs monospace">{{ exifData }}</pre> -->
-    <div v-if="exifData">
-
-      <!-- if we have GPSLatitude and GPSLongitude, display a map -->
-      <div v-if="photo.exifData.GPSLatitude && photo.exifData.GPSLongitude">
-        {{ photoLat }}, {{ photoLng }}
-
-        <!-- 
-        https://api.maptiler.com/maps/streets/static/6.0288,44.3408,3/400x300.png?key=YOUR_MAPTILER_API_KEY
-
-        key = r7rxV4ywyVD4sm1dYKUl
-       -->
-        <!-- <img
-          :src="`https://api.maptiler.com/maps/streets/static/${convertRationalToDecimal(photo.exifData.GPSLatitude)},${convertRationalToDecimal(photo.exifData.GPSLongitude)},3/400x300.png?key=ruILo1e1JzVMEE7ciRe4`" /> -->
-
-        <!-- mapbox access token: pk.eyJ1IjoiZWpmb3giLCJhIjoiY2lyZjd0bXltMDA4b2dma3JzNnA0ajh1bSJ9.iCmlE7gmJubz2RtL4RFzIw 
-        
-        style url: mapbox://styles/ejfox/cl7p0rxav000o15p0dnsl8jen
-      
-      -->
-
-        <img class="rounded-lg shadow-sm w-auto h-auto"
-          :src="`https://api.mapbox.com/styles/v1/ejfox/cl7p0rxav000o15p0dnsl8jen/static/${photoLng},${photoLat},8,0,0/400x300?access_token=pk.eyJ1IjoiZWpmb3giLCJhIjoiY2lyZjd0bXltMDA4b2dma3JzNnA0ajh1bSJ9.iCmlE7gmJubz2RtL4RFzIw`" />
-      </div>
-
-      <!--
-
-      We need a beautiful metadata display for the exif data:
-
-      {
-        "exposure": "1/500",
-        "aperture": "f/5.6",
-        "focalLength": "23 mm",
-        "iso": "800",
-        "make": "FUJIFILM",
-        "model": "X-Pro3",
-        "date": "2023:08:12 17:19:50",
-        "orientation": "6"
-      }
-
-    -->
-
-
-
-    </div>
-    <PhotoMetadata :photo="photo" />
-
-    <!-- <pre class="h-32 w-full overflow-auto text-xs monospace">{{ photo.exifData }}</pre> -->
-
-    <div v-if="photo?.exifData" class="max-h-96 overflow-y-auto">
-      <UTable :rows="exifAsRows" :columns="exifColumns" />
-    </div>
+    <img :src="cloudinaryThumb(imageUrl)" :alt="photo.public_id"
+      class="w-full h-auto border-black dark:border-white border-8 mx-auto" />
 
   </div>
 </template>
@@ -72,10 +21,18 @@ const props = defineProps({
 
 const cropType = toRef(props, 'cropType')
 const { copy, copied } = useClipboard()
-const width = 1080
+// const width = 1080
+const width = ref(1080)
+// const { width } = useWindowSize()
 const isDark = useDark()
 const exifData = ref(null)
 const route = useRoute()
+
+onMounted(() => {
+  const { width: windowWidth } = useWindowSize()
+  width.value = windowWidth.value
+})
+
 
 
 const exifAsRows = computed(() => {
@@ -129,12 +86,12 @@ function cloudinaryThumb(rawHref) {
   if (!rawHref) return
 
   if (cropType.value === 'fill') {
-    return rawHref.replace('upload/', `upload/g_object,c_fill,w_${width},h_${width},ar_1:1,z_1.5/`)
+    return rawHref.replace('upload/', `upload/g_object,c_fill,w_${width.value},h_${width.value},ar_1:1,z_1.5/`)
   }
   else if (cropType.value === 'pad') {
-    return rawHref.replace('upload/', `upload/c_pad,w_${width},h_${width},b_rgb:${imageBgColor.value}/`)
+    return rawHref.replace('upload/', `upload/c_pad,w_${width.value},h_${width.value},b_rgb:${imageBgColor.value}/`)
   } else {
-    return rawHref.replace('upload/', `upload/w_${width}/dpr_auto/`)
+    return rawHref.replace('upload/', `upload/w_${width.value}/dpr_auto/`)
   }
 }
 const { data, pending, error, refresh } = useAsyncData(async () => {
@@ -144,28 +101,6 @@ const { data, pending, error, refresh } = useAsyncData(async () => {
   })
 })
 
-
-function convertExifCoordinates(exifCoordinates, ref) {
-  const [degrees, minutes, seconds] = exifCoordinates.split(', ').map(part => {
-    const [numerator, denominator] = part.split('/').map(Number);
-    return numerator / denominator;
-  });
-
-  const decimalDegrees = degrees + (minutes / 60) + (seconds / 3600);
-  return ref === 'S' || ref === 'W' ? -decimalDegrees : decimalDegrees;
-}
-
-const photoLat = computed(() => {
-  if (props.photo.exifData.GPSLatitude && props.photo.exifData.GPSLatitudeRef) {
-    return convertExifCoordinates(props.photo.exifData.GPSLatitude, props.photo.exifData.GPSLatitudeRef);
-  }
-});
-
-const photoLng = computed(() => {
-  if (props.photo.exifData.GPSLongitude && props.photo.exifData.GPSLongitudeRef) {
-    return convertExifCoordinates(props.photo.exifData.GPSLongitude, props.photo.exifData.GPSLongitudeRef);
-  }
-});
 </script>
 
 <style scoped>

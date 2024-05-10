@@ -2,18 +2,24 @@
   <div class="photo-metadata">
     <div class="exif-camera" v-if="exifData">
       <div v-if="exifData.model === 'X-Pro3'">
-        <img src="/cam_xpro3.png" class="h-16 w-auto" />
+        <img src="/cam_xpro3.png" class="w-full h-auto" />
       </div>
 
       <div v-if="exifData.model === 'DSC-TX5'">
-        <img src="/cam_cybershot.png" class="h-16 w-auto" />
+        <img src="/cam_cybershot.png" class="w-full h-auto" />
       </div>
     </div>
-    <div>{{ exifData?.make }} {{ exifData?.model }}</div>
-    <div>{{ exifData?.aperture }} f/{{ exifData?.focalLength }}</div>
-    <div>{{ exifData?.exposure }} at ISO {{ exifData?.iso }}</div>
-    <!-- <div>{{ exifData.date }}</div> -->
-    <!-- <div>{{ formatDateTime(exifData.date) }}</div> -->
+    <div>
+      <div class="px-2 inline-block">{{ exifData?.make }} {{ exifData?.model }}</div>
+      <div class="px-2 inline-block">{{ exifData?.aperture }}</div>
+      <div class="px-2 inline-block">{{ exifData?.focalLength }}</div>
+      <div class="px-2 inline-block">{{ exifData?.exposure }} </div>
+      <div class="px-2 inline-block">ISO {{ exifData?.iso }}</div>
+      <div class="px-2 my-2 inline-block text-xs tracking-widest">
+        {{ exifData.date }}
+      </div>
+    </div>
+
 
   </div>
 </template>
@@ -27,16 +33,6 @@ const exifData = computed(() => {
   if (!props.photo.humanReadableExifData) return null
   return props.photo.humanReadableExifData
 })
-
-// // photo date time comes in like "2023:08:13 15:52:37"
-// function formatDateTime(exifDateTime) {
-//   // we want to parse it into a more readable format
-//   const [date, time] = exifDateTime.split(' ')
-//   const [year, month, day] = date.split(':')
-//   const [hour, minute, second] = time.split(':')
-//   // then we want to return something like YYYY-MM-DD H:Mam/pm
-//   return `${year}-${month}-${day} ${hour}:${minute}${hour > 12 ? 'pm' : 'am'}`
-// }
 
 </script>
 

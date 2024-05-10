@@ -6,4 +6,8 @@
 <script setup>
 
 </script>
-<style></style>
+<style>
+.text-monospace {
+  font-family: 'Fira Code', monospace;
+}
+</style>

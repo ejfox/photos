@@ -33,6 +33,7 @@ export default defineNuxtConfig({
       {
         families: {
           Figtree: [400, 700],
+          "Fira Code": [400, 700],
         },
       },
     ],

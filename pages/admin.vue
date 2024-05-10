@@ -23,7 +23,7 @@
 <script setup>
 import { ref } from 'vue'
 
-const numPhotos = ref(250)
+const numPhotos = ref(360)
 
 const { data: photos } = await useFetch('/api/cloudinary', {
   method: 'POST',

@@ -1,10 +1,12 @@
 <template>
   <div class="dark:bg-black dark:text-white min-h-screen">
 
-    <div class="flex flex-wrap p-2 lg:p-4">
-      <div v-for="photo in photos" ref="photoRef" class="p-4">
-        <NuxtLink :to="`/${photo?.public_id}`">View</NuxtLink>
-        <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" />
+    <div class="flex flex-wrap px-2 lg:px-4">
+      <div v-for="photo in photos" ref="photoRef" class="photo-container px-4 mx-auto shadow-lg"
+        :style="randomizedPhotoStyle(photo)">
+        <NuxtLink :to="`/${photo?.public_id}`">
+          <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" class="" />
+        </NuxtLink>
       </div>
 
     </div>
@@ -14,6 +16,9 @@
   </div>
 </template>
 <script setup>
+//import chance js
+import Chance from 'chance'
+
 const numPhotos = ref(250)
 
 
@@ -34,7 +39,31 @@ const cropOptions = [
   { label: 'pad', value: 'pad' }
 ]
 
+function randomizedPhotoStyle(photo) {
+  const chance = new Chance()
+  // we want to pretend we are throwing these photos down on a table
+  // so they kinda rotate and move around a bit randomly
+  // we are returning a style object that will be applied to the photo div
+  // const randomAngle = Math.floor(Math.random() * 360 * 0.025)
+  // const randomX = Math.floor(Math.random() * 100)
+  // const randomY = Math.floor(Math.random() * 100)  
 
+  const maxOffset = 24
+  const maxAngle = 1.33
+
+  // we can do a much better job with chance.js
+  const randomAngle = chance.floating({ min: -maxAngle, max: maxAngle })
+  const randomX = chance.integer({ min: -maxOffset, max: maxOffset })
+  const randomY = chance.integer({ min: -maxOffset, max: maxOffset })
+
+  const skewZ = chance.floating({ min: -maxAngle * 0.5, max: maxAngle * 0.5 })
+  return {
+    // transform: `rotate(${randomAngle}deg) skew(${skewZ}deg)`,
+    // transform: `rotate(${randomAngle}deg)`, // no skew no translate
+    transform: `translate(${randomX}px, ${randomY}px) rotate(${randomAngle}deg)`,
+
+  }
+}
 </script>
 <style>
 .dark a {
@@ -80,5 +109,14 @@ button {
   /* border-color: #fff; */
   border: none;
   color: #fff;
+}
+
+.photo-container {
+  transition: all 1200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.photo-container:hover {
+  /* transform: rotate(0deg) scale(1) !important; */
+  /* transform: scale(1.005) !important; */
 }
 </style>
