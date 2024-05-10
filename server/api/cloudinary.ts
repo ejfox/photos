@@ -21,6 +21,8 @@ export default defineEventHandler(async (event) => {
     body.filterOutScreenshots !== undefined ? body.filterOutScreenshots : true;
   const onlyScreenshots =
     body.onlyScreenshots !== undefined ? body.onlyScreenshots : false;
+  const onlyPhotoblog =
+    body.onlyPhotoblog !== undefined ? body.onlyPhotoblog : false;
 
   // log out the config options
   console.log("numPhotos: ", numPhotos);
@@ -34,9 +36,13 @@ export default defineEventHandler(async (event) => {
 
     // Fetch the last 100 images uploaded
     const result = await cloudinary.search
-      .expression("resource_type:image")
+      .expression(
+        "resource_type:image" + (onlyPhotoblog ? " AND tags=photo-blog" : "")
+      )
       .sort_by("uploaded_at", "desc")
       .with_field("tags")
+      .with_field("metadata")
+      .with_field("context")
       .max_results(numPhotos)
       .execute();
 

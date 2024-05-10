@@ -1,6 +1,6 @@
 <template>
   <div>
-    <NuxtPage />
+    <NuxtPage :keepalive="true" />
   </div>
 </template>
 <script setup>

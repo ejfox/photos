@@ -1,23 +1,15 @@
 <template>
-  <div class="dark:bg-black dark:text-white">
-    <div>
-      <!-- make a v-model input for numPhotos -->
-      <!-- <input type="number" v-model="numPhotos" class="p-2"> -->
-
-            <!-- make a v-model dropdown for cropOptions -->
-      <select v-model="cropType" class="p-2">
-        <option v-for="option in cropOptions" :selected="option.value === cropType" :value="option.value">{{ option.label
-        }}</option>
-      </select>
-    </div>
+  <div class="dark:bg-black dark:text-white min-h-screen">
 
     <div class="flex flex-wrap p-2 lg:p-4">
-      <div v-for="photo in photos" ref="photoRef" class="w-1/3 flex-item p-0 lg:p-1">
-        <LibraryPhoto :photo="photo" :cropType="cropType" />
+      <div v-for="photo in photos" ref="photoRef" class="p-4">
+        <NuxtLink :to="`/${photo?.public_id}`">View</NuxtLink>
+        <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" />
       </div>
+
     </div>
 
-  
+
 
   </div>
 </template>
@@ -27,7 +19,10 @@ const numPhotos = ref(250)
 
 const { data: photos } = await useFetch('/api/cloudinary', {
   method: 'POST',
-  body: JSON.stringify({ numPhotos: numPhotos.value })
+  body: JSON.stringify({
+    numPhotos: numPhotos.value,
+    onlyPhotoblog: true
+  })
 })
 
 const photoRef = ref([])

@@ -8,6 +8,18 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// We are limited to 2000 requests per hour, so we should limit the number of photos we fetch
+
+/*
+We can get the current rate limit via the API like
+cloudinary.v2.api
+.resources()
+.then(result=>console.log(result.rate_limit_allowed,
+        result.rate_limit_remaining,
+        result.rate_limit_reset_at));
+        
+
+*/
 console.log("Cloudinary configuration setup.");
 
 // Convert raw exposure time into standard photographic format
@@ -70,12 +82,12 @@ export default defineEventHandler(async (event) => {
 
     // Convert specific EXIF values to human-readable format
     const humanReadableExifData = {
-      // exposure: convertExposureTime(exifData.ExposureTime),
-      // aperture: convertAperture(exifData.FNumber),
-      // focalLength: convertFocalLength(exifData.FocalLength),
-      exposure: exifData.ExposureTime,
-      aperture: exifData.FNumber,
-      focalLength: exifData.FocalLength,
+      exposure: convertExposureTime(exifData.ExposureTime),
+      aperture: convertAperture(exifData.FNumber),
+      focalLength: convertFocalLength(exifData.FocalLength),
+      // exposure: exifData.ExposureTime,
+      // aperture: exifData.FNumber,
+      // focalLength: exifData.FocalLength,
       iso: exifData.PhotographicSensitivity,
       // Add more conversions as needed
       make: exifData.Make,
@@ -86,7 +98,11 @@ export default defineEventHandler(async (event) => {
       longitude: exifData.GPSLongitude,
     };
 
-    return { exifData, humanReadableExifData };
+    return {
+      exifData,
+      humanReadableExifData,
+      ...result,
+    };
   } catch (err) {
     console.error("Error fetching EXIF data from Cloudinary: ", err);
     return { error: "An error occurred while fetching EXIF data." };
