@@ -77,6 +77,10 @@ export default defineEventHandler(async (event) => {
     // Fetch the resource details with EXIF data
     const result = await cloudinary.api.resource(resourceId, { exif: true });
 
+    if (!result.exif) {
+      return { error: "No EXIF data found for the resource." };
+    }
+
     // Extract the EXIF data from the result
     const exifData = result.exif || {};
 
