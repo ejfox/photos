@@ -1,19 +1,25 @@
 <template>
   <div
-    class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y snap-mandatory xl:snap-proximity overflow-x-hidden py-8 lg:py-24">
+    class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y xl:snap-proximity overflow-x-hidden py-8 lg:py-32 mb-12">
+
+    <a href="https://ejfox.com" class="block p-2 lg:p-8 mx-auto max-w-96 snap-center">
+      <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto my-8 lg:my-32" alt="Made with love" />
+    </a>
 
     <div class="photo-list flex flex-wrap px-2 lg:px-4">
       <div v-for="photo in photos" ref="photoRef"
-        class="photo-container mx-auto snap-start snap-always bg-white dark:bg-black overflow-hidden"
-        :style="randomizedPhotoStyle(photo)">
-        <NuxtLink :to="`/${photo?.public_id}`">
-          <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" class="" />
+        class="photo-container rounded-sm mx-auto snap-start snap-always py-12 lg:py-16 relative"
+        :style="randomizedPhotoStyle(photo)" :id="`${photo.public_id}`">
+        <NuxtLink :to="`/${photo?.public_id}`" class=" overflow-hidden">
+          <LibraryPhoto :key="photo.public_id" :photo="photo" class="" />
+          <!-- date metadata -->
+          <div class="text-right text-xs text-gray-300 dark:text-gray-700/50 font-mono tracking-widest font-light">
+            {{ formatDate(photo.created_at) }}
+          </div>
         </NuxtLink>
       </div>
 
-      <a href="https://ejfox.com" class="block p-2 lg:p-8">
-        <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto my-8 lg:my-32" alt="Made with love" />
-      </a>
+
 
     </div>
   </div>
@@ -21,6 +27,27 @@
 <script setup>
 //import chance js
 import Chance from 'chance'
+import dayjs from 'dayjs';
+import 'dayjs/locale/en'; // or any other locale you prefer
+
+const route = useRoute()
+
+// when the route changes, if it has a hash, scroll to that element
+onMounted(() => {
+  if (route.hash) {
+    console.log('scrolling to', route.hash)
+    const el = document.querySelector(route.hash)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+})
+
+function formatDate(date) {
+  // return dayjs(date).locale('en').format('MMMM D, YYYY');
+  // a cool cyberpunk vibe
+  return dayjs(date).locale('en').format('YYYY-MM-DD');
+}
 
 const numPhotos = ref(250)
 
@@ -52,7 +79,7 @@ function randomizedPhotoStyle(photo) {
   const randomAngle = chance.integer({ min: -maxAngle, max: maxAngle })
   const randomX = chance.floating({ min: -maxOffsetX, max: maxOffsetX })
   const randomY = chance.floating({ min: -maxOffsetY, max: maxOffsetY })
-  const scale = chance.floating({ min: 0.96, max: 1.072 })
+  const scale = chance.floating({ min: 0.92, max: 1 })
   // console.log({ randomAngle, randomX, randomY })
 
   const skewZ = chance.floating({ min: -maxAngle * 0.5, max: maxAngle * 0.5 })
@@ -118,6 +145,7 @@ button {
 }
 
 .photo-container {
+  /* border-width: 1.2em; */
   transition: all 1200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -132,12 +160,11 @@ button {
 }
 
 
-/* invert the z-index of the photo-list children */
+/* makes the photos overlap more like a stack of photos */
 .photo-list>* {
   z-index: 1;
 }
 
-/* invert the z-index of the photo-list children */
 .photo-list>*:nth-child(odd) {
   z-index: 2;
 }

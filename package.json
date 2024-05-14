@@ -28,6 +28,7 @@
     "chance": "^1.1.11",
     "cloudinary": "^2.2.0",
     "d3": "^7.9.0",
+    "dayjs": "^1.11.11",
     "exif-js": "^2.3.0",
     "nuxt-perfect-cache": "^1.1.4",
     "tachyons": "^4.12.0",

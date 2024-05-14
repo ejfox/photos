@@ -6,24 +6,25 @@
         {{ exifData?.caption }}
       </blockquote>
 
-      <div>
+      <div class="uppercase tracking-widest md:flex justify-between text-md">
+        <div class="px-2  tracking-widest font-semibold leading-0">
+          {{ exifData.date }}
+        </div>
         <div class="px-2 inline-block">{{ exifData?.make }} {{ exifData?.model }}</div>
         <div class="px-2 inline-block">{{ exifData?.aperture }}</div>
         <div class="px-2 inline-block">{{ exifData?.focalLength }} lens</div>
         <div class="px-2 inline-block">{{ exifData?.exposure }} </div>
         <div class="px-2 inline-block">ISO {{ exifData?.iso }}</div>
-        <div class="px-2 my-2 inline-block text-xs tracking-widest leading-0">
-          {{ exifData.date }}
-        </div>
+
       </div>
 
-      <div>
+      <div class="">
         <div v-if="exifData.model === 'X-Pro3'">
-          <img src="/cam_xpro3.png" class="mx-auto max-h-32 w-auto" />
+          <img src="/cam_xpro3.png" class=" max-h-32 w-auto" />
         </div>
 
         <div v-if="exifData.model === 'DSC-TX5'">
-          <img src="/cam_cybershot.png" class="mx-auto max-h-32 w-auto" />
+          <img src="/cam_cybershot.png" class=" max-h-32 w-auto" />
         </div>
       </div>
     </div>
@@ -38,6 +39,7 @@
 </template>
 
 <script setup>
+
 const props = defineProps({
   photo: Object
 })

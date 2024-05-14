@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen pb-24">
+  <div class="pb-8">
 
     <!-- we are gonna take the image and make it huge and in the background and very very blurry -->
     <div ref="bgImage"
@@ -10,25 +10,28 @@
 
     <!-- <NuxtLink class="w-32 block mx-auto text-center bg-gray-800 text-white px-3 py-1 rounded-sm my-8 text-sm" :to="`/`">
       Back</NuxtLink> -->
-    <UButton to="/" class="mt-4 w-16 text-center block mx-auto">Back
-    </UButton>
+    <div class="pl-4 lg:pl-24">
+      <UButton :to="`/#${photo?.public_id}`" class="mt-4 max-w-32 text-center block text-balance" color="white">Back to
+        all photos
+      </UButton>
+    </div>
 
     <div class="lg:flex items-center justify-center">
       <div class="p-4 lg:px-24">
         <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" />
       </div>
 
-      <div
-        class="lg:flex flex-col items-center lg:w-48 text-xs text-monospace opacity-50 hover:opacity-100 transition-opacity duration-200">
-        <div class="p-4 w-auto">
+      <div class="lg:flex flex-col items-center lg:w-48 text-xs text-monospace">
+        <div class="p-4 lg:px-24 w-auto">
           <PhotoMetadata v-if="photo?.exifData" :photo="photo" />
         </div>
 
-        <div v-if="photo?.exifData" ref="mapContainer"
+        <!-- map -->
+        <div v-if="false" ref="mapContainer"
           class="
         map-container
         flex flex-col items-center  w-full mt-16 lg:mt-0 lg:min-h-32 rounded-lg shadow-sm overflow-hidden relative md:opacity-20 hover:opacity-100 transition-opacity duration-200">
-          <div v-if="photo?.exifData?.GPSLatitude" class="flex flew-row items-center justify-center">
+          <div v-if="photo?.exifData?.GPSLatitude" class="flex flew-row">
             <img class="lg:brightness-125 lg:contrast-125 lg:opacity-50"
               :src="`https://api.mapbox.com/styles/v1/ejfox/${modeStyle}/static/${convertExifCoordinates(photo?.exifData.GPSLongitude, photo?.exifData.GPSLongitudeRef)},${convertExifCoordinates(photo?.exifData.GPSLatitude, photo?.exifData.GPSLatitudeRef)},4.5,0,0/${width}x${containerWidth}?access_token=pk.eyJ1IjoiZWpmb3giLCJhIjoiY2lyZjd0bXltMDA4b2dma3JzNnA0ajh1bSJ9.iCmlE7gmJubz2RtL4RFzIw`" />
 
@@ -52,9 +55,11 @@
       </div>
     </div>
 
-    <a href="https://ejfox.com" class="block p-2 lg:p-8 w-32 h-32 mx-auto">
-      <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto my-8 lg:my-32" alt="Made with love" />
-    </a>
+    <div class="px-12 lg:px-24">
+      <a href="https://ejfox.com" class="block w-28 h-28  opacity-30">
+        <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto my-8 lg:my-32" alt="Made with love" />
+      </a>
+    </div>
   </div>
 </template>
 <script setup>
