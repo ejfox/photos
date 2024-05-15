@@ -12,14 +12,15 @@
     <!-- <NuxtLink class="w-32 block mx-auto text-center bg-gray-800 text-white px-3 py-1 rounded-sm my-8 text-sm" :to="`/`">
       Back</NuxtLink> -->
     <div class="pl-4 lg:pl-24">
-      <UButton :to="`/#${photo?.public_id}`" class="mt-4 max-w-32 text-center block text-balance" color="white">Back to
+      <UButton :to="`/#photo-${photo?.public_id}`" class="mt-4 max-w-32 text-center block text-balance" color="white">
+        Back to
         all photos
       </UButton>
     </div>
 
     <div class="">
-      <div class="p-4 lg:px-24">
-        <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" />
+      <div class="p-4 lg:px-24" :id="`photo-${photo.public_id}`">
+        <LibraryPhoto :key="photo.public_id" :photo="photo" />
       </div>
 
       <div class="lg:flex flex-col items-center text-xs text-monospace">

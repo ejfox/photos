@@ -9,7 +9,7 @@
     <div class="photo-list flex flex-wrap px-2 lg:px-4">
       <div v-for="photo in photos" ref="photoRef"
         class="photo-container rounded-sm mx-auto snap-start snap-always py-12 lg:py-16 relative"
-        :style="randomizedPhotoStyle(photo)" :id="`${photo.public_id}`">
+        :style="randomizedPhotoStyle(photo)" :id="`photo-${photo.public_id}`">
         <NuxtLink :to="`/${photo?.public_id}`" class=" overflow-hidden">
           <LibraryPhoto :key="photo.public_id" :photo="photo" class="" />
           <!-- date metadata -->
@@ -33,19 +33,33 @@ import 'dayjs/locale/en'; // or any other locale you prefer
 const route = useRoute()
 
 // when the route changes, if it has a hash, scroll to that element
-onMounted(() => {
+onMounted(async () => {
+  await nextTick()
   if (route.hash) {
-    console.log('scrolling to', route.hash)
-    const el = document.querySelector(route.hash)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' })
-    }
+    scrollToHash()
   }
 })
 
+// watch the route hash and when it changes scroll to that element
+watch(() => route.hash, scrollToHash, { immediate: true })
+
+async function scrollToHash() {
+  const fileName = JSON.parse(JSON.stringify(route.hash)).replace('#photo-', '')
+
+  // find the photoRef with the ID of the hash
+  const el = photoRef.value.find(photo => {
+    // get the ID of the attribute
+    const id = photo.getAttribute('id')
+    return id === `photo-${fileName}`
+  })
+  if (el) {
+    // await new Promise(resolve => setTimeout(resolve, 250))
+    el.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
 function formatDate(date) {
   // return dayjs(date).locale('en').format('MMMM D, YYYY');
-  // a cool cyberpunk vibe
   return dayjs(date).locale('en').format('YYYY-MM-DD');
 }
 
@@ -73,7 +87,7 @@ function randomizedPhotoStyle(photo) {
 
   const maxOffsetY = 26
   const maxOffsetX = 12
-  const maxAngle = 2
+  const maxAngle = 2.5
 
   // we can do a much better job with chance.js
   const randomAngle = chance.integer({ min: -maxAngle, max: maxAngle })
@@ -83,7 +97,7 @@ function randomizedPhotoStyle(photo) {
   // console.log({ randomAngle, randomX, randomY })
 
   const skewZ = chance.floating({ min: -maxAngle * 0.5, max: maxAngle * 0.5 })
-  if (chance.bool({ likelihood: 0.2 })) return {}
+  if (chance.bool({ likelihood: 0.333 })) return {}
   if (chance.bool({ likelihood: 0.1 })) return {
     transform: `rotate(${randomAngle}deg) skew(${skewZ}deg)`,
   }
