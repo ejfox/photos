@@ -1,12 +1,12 @@
 <template>
-  <div class="photo-metadata leading-6">
-    <div class="exif-camera" v-if="exifData">
+  <div class="photo-metadata leading-6 px-4">
+    <div class="exif-camera px-4" v-if="exifData">
 
-      <blockquote class="px-2 py-4 image-caption text-2xl font-serif">
+      <blockquote class="px-4 py-4 image-caption text-2xl font-serif">
         {{ exifData?.caption }}
       </blockquote>
 
-      <div class="uppercase tracking-widest md:flex justify-between text-md">
+      <div class="uppercase tracking-widest md:flex justify-between items-center text-md">
         <div class="px-2  tracking-widest font-semibold leading-0">
           {{ exifData.date }}
         </div>
@@ -19,12 +19,12 @@
       </div>
 
       <div class="">
-        <div v-if="exifData.model === 'X-Pro3'">
-          <img src="/cam_xpro3.png" class=" max-h-32 w-auto" />
+        <div class="" v-if="exifData.model === 'X-Pro3'">
+          <img src="/cam_xpro3.png" class=" mx-auto max-h-32 w-auto" />
         </div>
 
-        <div v-if="exifData.model === 'DSC-TX5'">
-          <img src="/cam_cybershot.png" class=" max-h-32 w-auto" />
+        <div class="" v-if="exifData.model === 'DSC-TX5'">
+          <img src="/cam_cybershot.png" class=" mx-auto max-h-32 w-auto" />
         </div>
       </div>
     </div>

@@ -3,7 +3,8 @@
 
     <!-- we are gonna take the image and make it huge and in the background and very very blurry -->
     <div ref="bgImage"
-      class="bg-image absolute top-0 left-0 w-full h-full bg-cover -z-10 blur-3xl bg-center bg-no-repeat" :style="{
+      class="bg-image absolute top-0 left-0 w-full h-full bg-cover -z-10 blur-3xl bg-center bg-no-repeat opacity-25"
+      :style="{
         backgroundImage: `url(${smallBgImage(photo?.secure_url)})`
       }"> </div>
 
@@ -16,12 +17,12 @@
       </UButton>
     </div>
 
-    <div class="lg:flex items-center justify-center">
+    <div class="">
       <div class="p-4 lg:px-24">
         <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" />
       </div>
 
-      <div class="lg:flex flex-col items-center lg:w-48 text-xs text-monospace">
+      <div class="lg:flex flex-col items-center text-xs text-monospace">
         <div class="p-4 lg:px-24 w-auto">
           <PhotoMetadata v-if="photo?.exifData" :photo="photo" />
         </div>
@@ -56,7 +57,7 @@
     </div>
 
     <div class="px-12 lg:px-24">
-      <a href="https://ejfox.com" class="block w-28 h-28  opacity-30">
+      <a href="https://ejfox.com" class="block w-28 h-28  opacity-30 mx-auto">
         <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto my-8 lg:my-32" alt="Made with love" />
       </a>
     </div>
