@@ -31,6 +31,8 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/en'; // or any other locale you prefer
 
 const route = useRoute()
+const photoRef = ref([])
+const numPhotos = ref(250)
 
 // when the route changes, if it has a hash, scroll to that element
 onMounted(async () => {
@@ -63,7 +65,6 @@ function formatDate(date) {
   return dayjs(date).locale('en').format('YYYY-MM-DD');
 }
 
-const numPhotos = ref(250)
 
 
 const { data: photos } = await useFetch('/api/cloudinary', {
@@ -74,7 +75,7 @@ const { data: photos } = await useFetch('/api/cloudinary', {
   })
 })
 
-const photoRef = ref([])
+
 
 function randomizedPhotoStyle(photo) {
   const chance = new Chance()

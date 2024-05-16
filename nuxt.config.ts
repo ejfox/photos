@@ -21,8 +21,16 @@ export default defineNuxtConfig({
     // 'tachyons/css/tachyons.css',
     "vue-toast-notification/dist/theme-default.css",
   ],
+
   modules: [
-    // '@nuxtjs/supabase',
+    [
+      "@nuxtjs/supabase",
+      {
+        redirectOptions: {
+          exclude: ["/", "/ig"],
+        },
+      },
+    ],
     "@vueuse/nuxt",
     "@pinia/nuxt",
     "@vueuse/nuxt",
