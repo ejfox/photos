@@ -27,7 +27,9 @@ export default defineNuxtConfig({
       "@nuxtjs/supabase",
       {
         redirectOptions: {
-          exclude: ["/", "/ig"],
+          // exclude: ["/", "/ig", ],
+          exclude: ["/*"],
+          include: ["/admin", "/screenshots"],
         },
       },
     ],
