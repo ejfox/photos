@@ -1,4 +1,4 @@
-// server/api/latest-photos.ts
+// server/api/cloudinary.ts
 import { defineEventHandler } from "h3";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -83,3 +83,31 @@ export default defineEventHandler(async (event) => {
     return { error: "An error occurred while fetching photos." };
   }
 });
+
+// New function to fetch lite-info on all photos
+async function fetchLiteInfo() {
+  try {
+    const result = await cloudinary.api.resources({
+      type: "upload",
+      max_results: 500, // Adjust as needed, max is 500
+      resource_type: "image",
+      // Add any additional parameters for filtering or sorting if necessary
+    });
+
+    // Process the result to extract necessary lite-info
+    const liteInfo = result.resources.map((resource) => ({
+      public_id: resource.public_id,
+      secure_url: resource.secure_url,
+      created_at: resource.created_at,
+      // Add any other relevant fields you want to include
+    }));
+
+    return liteInfo;
+  } catch (err) {
+    console.error("Error fetching lite-info from Cloudinary: ", err);
+    return { error: "An error occurred while fetching lite-info." };
+  }
+}
+
+// Export the new function if needed
+export { fetchLiteInfo };
