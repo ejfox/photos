@@ -55,3 +55,36 @@ yarn preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+## API Endpoints
+
+### `/api/cloudinary-lite-info`
+
+This endpoint retrieves lite information about all photos stored in Cloudinary.
+
+#### Request Method:
+- `GET`
+
+#### Response:
+The response will be a JSON array containing objects with the following fields for each photo:
+- `public_id`: The unique identifier for the photo in Cloudinary.
+- `secure_url`: The secure URL to access the photo.
+- `created_at`: The date and time when the photo was uploaded.
+
+#### Example Response:
+```json
+[
+  {
+    "public_id": "sample_photo_1",
+    "secure_url": "https://res.cloudinary.com/demo/image/upload/v123456/sample_photo_1.jpg",
+    "created_at": "2023-01-01T12:00:00Z"
+  },
+  {
+    "public_id": "sample_photo_2",
+    "secure_url": "https://res.cloudinary.com/demo/image/upload/v123456/sample_photo_2.jpg",
+    "created_at": "2023-01-02T12:00:00Z"
+  }
+]
+```
+
+This endpoint is useful for fetching a summary of all photos for analytics, such as totals, counts, and grouping by month stats.
