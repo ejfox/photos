@@ -2,9 +2,22 @@
   <div
     class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y xl:snap-proximity overflow-x-hidden py-8 lg:py-32 mb-12">
 
+    <div class="flex justify-center text-lg text-black dark:text-white">
+      <a href="/rss.xml" class="flex items-center">
+        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 110-2 1 1 0 010 2z" />
+        </svg>
+        Subscribe to RSS
+      </a>
+    </div>
+
     <a href="https://ejfox.com" class="block p-2 lg:p-8 mx-auto max-w-96 snap-center">
       <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto my-8 lg:my-32" alt="Made with love" />
     </a>
+
+
 
     <div class="photo-list flex flex-wrap px-2 lg:px-4">
       <div v-for="photo in photos" ref="photoRef"
