@@ -82,10 +82,13 @@ function formatDate(date) {
 
 const { data: photos } = await useFetch('/api/cloudinary', {
   method: 'POST',
-  body: JSON.stringify({
-    numPhotos: numPhotos.value,
-    onlyPhotoblog: true
-  })
+  body: {
+    filterOutScreenshots: true,
+    onlyPhotoblog: true,
+    numPhotos: 1000,
+    includeContext: true,
+    includeTags: true
+  }
 })
 
 

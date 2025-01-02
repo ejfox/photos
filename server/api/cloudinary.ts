@@ -2,17 +2,38 @@
 import { defineEventHandler } from "h3";
 import { v2 as cloudinary } from "cloudinary";
 
-// Configure Cloudinary with your Environment Variables
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Track if we've already configured Cloudinary
+let isConfigured = false;
 
-console.log("Cloudinary configuration setup.");
+function setupCloudinary() {
+  if (isConfigured) return;
+
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
+  isConfigured = true;
+  console.log("Cloudinary configured successfully");
+}
+
+interface CloudinaryResource {
+  public_id: string;
+  secure_url: string;
+  created_at: string;
+  tags?: string[];
+  context?: {
+    custom?: {
+      ai_description?: string;
+      updated_at?: string;
+    };
+  };
+}
 
 export default defineEventHandler(async (event) => {
-  // read the body from the event
+  setupCloudinary();
+
   const body = await readBody(event);
   console.log(body);
 
@@ -46,18 +67,27 @@ export default defineEventHandler(async (event) => {
       .max_results(numPhotos)
       .execute();
 
-    // Filter out images that have 'screenshot' or 'private' tags
-    let filteredResources = result.resources.filter((resource) => {
-      const tags = resource.tags || []; // Ensure tags is an array, even if undefined
-      const public_id = resource.public_id || ""; // Ensure public_id is a string, even if undefined
-      const isScreenshot =
-        tags.includes("screenshot") ||
-        public_id.includes("Screenshot") ||
-        public_id.includes("screenshot");
+    // Helper function to identify screenshots
+    const isScreenshot = (resource: any) => {
+      const tags = resource.tags || [];
+      const public_id = (resource.public_id || "").toLowerCase();
       return (
-        (onlyScreenshots && isScreenshot) ||
-        (filterOutScreenshots && !isScreenshot) ||
-        tags.includes("private")
+        tags.includes("screenshot") ||
+        public_id.includes("screenshot") ||
+        public_id.includes("screen shot") ||
+        public_id.includes("screencap") ||
+        public_id.startsWith("screenshots/") ||
+        public_id.includes("/screenshots/")
+      );
+    };
+
+    // Filter resources based on screenshot preferences
+    let filteredResources = result.resources.filter((resource: any) => {
+      const isScreenshotResource = isScreenshot(resource);
+      return (
+        (onlyScreenshots && isScreenshotResource) ||
+        (filterOutScreenshots && !isScreenshotResource) ||
+        (!filterOutScreenshots && !onlyScreenshots)
       );
     });
 
@@ -68,18 +98,20 @@ export default defineEventHandler(async (event) => {
     );
 
     // Create a simplified collection of information about the photos to send back to the client
-    const photos = filteredResources.map((resource) => ({
+    const photos = filteredResources.map((resource: any) => ({
       href: resource.secure_url,
       public_id: resource.public_id,
       uploaded_at: resource.created_at,
-      // potentially add other relevant fields here
+      secure_url: resource.secure_url,
+      context: resource.context,
+      tags: resource.tags,
+      // Include any other fields we need
       ...resource,
     }));
 
     return photos;
   } catch (err) {
     console.error("Error fetching photos from Cloudinary: ", err);
-    // Return an HTTP error code here for better error handling
     return { error: "An error occurred while fetching photos." };
   }
 });

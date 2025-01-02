@@ -1,12 +1,21 @@
 import { defineEventHandler } from "h3";
 import { v2 as cloudinary } from "cloudinary";
 
-// Configure Cloudinary with your Environment Variables
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Track if we've already configured Cloudinary
+let isConfigured = false;
+
+function setupCloudinary() {
+  if (isConfigured) return;
+
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
+  isConfigured = true;
+  console.log("Cloudinary configured successfully");
+}
 
 // We are limited to 2000 requests per hour, so we should limit the number of photos we fetch
 
@@ -22,96 +31,113 @@ cloudinary.v2.api
 */
 console.log("Cloudinary configuration setup.");
 
-// Convert raw exposure time into standard photographic format
-function convertExposureTime(exposureTime) {
-  if (!exposureTime) {
-    return "";
-  }
-
-  const [numerator, denominator] = exposureTime.split("/");
-  const seconds = parseFloat(numerator) / parseFloat(denominator);
-
-  // return the exposure time as it would appear on the camera
-  // like 1/1000 or 1/30 or 5s
-  if (seconds > 1) {
-    return `${seconds}s`;
-  } else {
-    return `1/${Math.round(1 / seconds)}`;
-  }
+interface CloudinaryResource {
+  public_id: string;
+  secure_url: string;
+  created_at: string;
+  context?: {
+    custom?: {
+      ai_description?: string;
+      updated_at?: string;
+    };
+  };
+  image_metadata?: {
+    ExposureTime?: string;
+    FNumber?: string;
+    FocalLength?: string;
+    Make?: string;
+    Model?: string;
+    DateTimeOriginal?: string;
+    GPSLatitude?: string;
+    GPSLongitude?: string;
+    GPSLatitudeRef?: string;
+    GPSLongitudeRef?: string;
+    ImageDescription?: string;
+    PhotographicSensitivity?: number;
+    Orientation?: number;
+  };
 }
 
-function convertAperture(aperture) {
-  if (!aperture) {
-    return "";
-  }
+function convertExposureTime(exposureTime: string | undefined): string {
+  if (!exposureTime) return "";
+  const [numerator, denominator] = exposureTime.split("/");
+  const seconds = parseFloat(numerator) / parseFloat(denominator);
+  return seconds > 1 ? `${seconds}s` : `1/${Math.round(1 / seconds)}`;
+}
 
+function convertAperture(aperture: string | undefined): string {
+  if (!aperture) return "";
   const [numerator, denominator] = aperture.split("/");
   const fNumber = parseFloat(numerator) / parseFloat(denominator);
   return `f/${fNumber.toFixed(1)}`;
 }
 
-function convertFocalLength(focalLength) {
-  if (!focalLength) {
-    return "";
-  }
-
+function convertFocalLength(focalLength: string | undefined): string {
+  if (!focalLength) return "";
   const [numerator, denominator] = focalLength.split("/");
-  const millimeters = Math.round(
-    parseFloat(numerator) / parseFloat(denominator)
-  );
-  return `${millimeters}mm`;
+  return `${Math.round(parseFloat(numerator) / parseFloat(denominator))}mm`;
 }
 
 export default defineEventHandler(async (event) => {
-  // read the body from the event
+  setupCloudinary();
+
   const body = await readBody(event);
-  console.log(body);
+  const { resourceId } = body;
 
-  const resourceId = body.resourceId;
-
-  if (!resourceId) {
-    return { error: "Resource ID is required." };
+  if (!resourceId || typeof resourceId !== "string") {
+    console.error("Invalid or missing resourceId:", resourceId);
+    return {
+      error: "Resource ID is required and must be a string.",
+      providedValue: resourceId,
+    };
   }
 
   try {
-    console.log(`Fetching EXIF data for resource ID: ${resourceId}`);
-
     // Fetch the resource details with EXIF data
-    const result = await cloudinary.api.resource(resourceId, { exif: true });
+    const result = await cloudinary.api.resource(resourceId, {
+      image_metadata: true,
+      exif: true,
+      context: true,
+    });
 
-    if (!result.exif) {
-      return { error: "No EXIF data found for the resource." };
+    if (!result) {
+      console.error("No result from Cloudinary for resourceId:", resourceId);
+      return { error: "No data found for the provided resource ID" };
     }
 
     // Extract the EXIF data from the result
-    const exifData = result.exif || {};
+    const exifData = {
+      ...result.image_metadata,
+      ...result.exif,
+    };
 
     // Convert specific EXIF values to human-readable format
     const humanReadableExifData = {
       exposure: convertExposureTime(exifData.ExposureTime),
       aperture: convertAperture(exifData.FNumber),
       focalLength: convertFocalLength(exifData.FocalLength),
-      caption: exifData?.ImageDescription || "",
-      // exposure: exifData.ExposureTime,
-      // aperture: exifData.FNumber,
-      // focalLength: exifData.FocalLength,
+      caption: exifData.ImageDescription || "",
       iso: exifData.PhotographicSensitivity,
-      // Add more conversions as needed
       make: exifData.Make,
       model: exifData.Model,
       date: exifData.DateTimeOriginal,
       orientation: exifData.Orientation,
       latitude: exifData.GPSLatitude,
       longitude: exifData.GPSLongitude,
+      latitudeRef: exifData.GPSLatitudeRef,
+      longitudeRef: exifData.GPSLongitudeRef,
     };
 
     return {
+      ...result,
       exifData,
       humanReadableExifData,
-      ...result,
     };
-  } catch (err) {
-    console.error("Error fetching EXIF data from Cloudinary: ", err);
-    return { error: "An error occurred while fetching EXIF data." };
+  } catch (err: any) {
+    console.error("Error fetching EXIF data:", err);
+    return {
+      error: "Failed to fetch EXIF data",
+      details: err.message,
+    };
   }
 });

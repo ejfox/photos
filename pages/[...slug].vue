@@ -1,5 +1,5 @@
 <template>
-  <div class="pb-8">
+  <div class="pb-24">
 
     <!-- we are gonna take the image and make it huge and in the background and very very blurry -->
     <div ref="bgImage"
@@ -8,31 +8,35 @@
         backgroundImage: `url(${smallBgImage(photo?.secure_url)})`
       }"> </div>
 
-
-    <!-- <NuxtLink class="w-32 block mx-auto text-center bg-gray-800 text-white px-3 py-1 rounded-sm my-8 text-sm" :to="`/`">
-      Back</NuxtLink> -->
-    <div class="pl-4 lg:pl-24">
-      <UButton :to="`/#photo-${photo?.public_id}`" class="mt-4 max-w-32 text-center block text-balance" color="white">
-        Back to
-        all photos
+    <!-- Back button -->
+    <div class="p-12 lg:p-24">
+      <UButton :to="`/#photo-${photo?.public_id}`" variant="ghost"
+        class="text-xs font-mono tracking-tight opacity-50 hover:opacity-100 transition-opacity">
+        ← Back to photos
       </UButton>
     </div>
 
-    <div class="">
-      <div class="p-4 lg:px-24" :id="`photo-${photo.public_id}`">
+    <div class="space-y-24">
+      <div class="px-12 lg:px-24" :id="`photo-${photo.public_id}`">
         <LibraryPhoto :key="photo.public_id" :photo="photo" />
       </div>
 
       <div class="lg:flex flex-col items-center text-xs text-monospace">
-        <div class="p-4 lg:px-24 w-auto">
+        <div class="px-12 lg:px-24 w-auto space-y-12">
           <PhotoMetadata v-if="photo?.exifData" :photo="photo" />
+
+          <!-- AI Description -->
+          <div v-if="photo?.context?.custom?.ai_description"
+            class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed max-w-prose tracking-tight">
+            {{ photo.context.custom.ai_description }}
+          </div>
         </div>
 
         <!-- map -->
         <div v-if="false" ref="mapContainer"
           class="
         map-container
-        flex flex-col items-center  w-full mt-16 lg:mt-0 lg:min-h-32 rounded-lg shadow-sm overflow-hidden relative md:opacity-20 hover:opacity-100 transition-opacity duration-200">
+        flex flex-col items-center  w-full mt-24 lg:mt-0 lg:min-h-32 rounded-lg shadow-sm overflow-hidden relative md:opacity-20 hover:opacity-100 transition-opacity duration-200">
           <div v-if="photo?.exifData?.GPSLatitude" class="flex flew-row">
             <img class="lg:brightness-125 lg:contrast-125 lg:opacity-50"
               :src="`https://api.mapbox.com/styles/v1/ejfox/${modeStyle}/static/${convertExifCoordinates(photo?.exifData.GPSLongitude, photo?.exifData.GPSLongitudeRef)},${convertExifCoordinates(photo?.exifData.GPSLatitude, photo?.exifData.GPSLatitudeRef)},4.5,0,0/${width}x${containerWidth}?access_token=pk.eyJ1IjoiZWpmb3giLCJhIjoiY2lyZjd0bXltMDA4b2dma3JzNnA0ajh1bSJ9.iCmlE7gmJubz2RtL4RFzIw`" />
@@ -44,7 +48,7 @@
             <div
               class="coordinates absolute bottom-0 left-0 p-2 text-gray-700 dark:text-gray-300 w-full flex flex-col tracking-tighter leading-0 text-shadow-md">
               <span class="text-3xl lg:text-sm white:bg-white/10 dark:bg-black/20 rounded-sm">{{
-        photo?.exifData.GPSLatitude }}
+                photo?.exifData.GPSLatitude }}
                 {{ photo?.exifData.GPSLatitudeRef }}</span>
               <span class="text-3xl lg:text-sm">{{ photo?.exifData.GPSLongitude }}
                 {{ photo?.exifData.GPSLongitudeRef }}
@@ -55,12 +59,12 @@
 
         </div>
       </div>
-    </div>
 
-    <div class="px-12 lg:px-24">
-      <a href="https://ejfox.com" class="block w-28 h-28  opacity-30 mx-auto">
-        <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto my-8 lg:my-32" alt="Made with love" />
-      </a>
+      <div class="px-12 lg:px-24">
+        <a href="https://ejfox.com" class="block w-28 h-28  opacity-30 mx-auto">
+          <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto" alt="Made with love" />
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -68,7 +72,10 @@
 import { animate } from '~/anime.esm.js'
 const isDark = useDark()
 const params = useRoute().params
-const slug = ref(params.slug[0])
+const slug = computed(() => {
+  // Handle both array and string cases
+  return Array.isArray(params.slug) ? params.slug[0] : params.slug
+})
 
 const mapContainer = ref(null)
 const { width: containerWidth, height: containerHeight } = useElementSize(mapContainer)
@@ -85,7 +92,10 @@ const modeStyle = computed(() => {
 
 const { data: photo } = await useFetch(`/api/cloudinary-exif`, {
   method: 'POST',
-  body: JSON.stringify({ resourceId: slug.value })
+  body: {
+    resourceId: slug.value,
+    includeContext: true
+  }
 })
 
 function convertExifCoordinates(exifCoordinates, ref) {
