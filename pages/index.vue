@@ -126,6 +126,23 @@ function randomizedPhotoStyle(photo) {
   }
 }
 
+useHead({
+  title: 'EJ Fox Photography',
+  meta: [
+    { name: 'description', content: 'A collection of photographs by EJ Fox - capturing moments in NYC and beyond.' },
+    { property: 'og:title', content: 'EJ Fox Photography' },
+    { property: 'og:description', content: 'A collection of photographs by EJ Fox - capturing moments in NYC and beyond.' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:image', content: photos.value?.[0]?.secure_url || '' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:site', content: '@mrejfox' },
+    { name: 'twitter:creator', content: '@mrejfox' }
+  ],
+  link: [
+    { rel: 'canonical', href: 'https://photos.ejfox.com' }
+  ]
+})
+
 
 
 </script>

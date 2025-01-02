@@ -129,6 +129,49 @@ function smallBgImage(rawHref) {
   return rawHref.replace('upload/', `upload/w_200/dpr_auto/`)
 }
 
+// Compute photo title from metadata or fallback to date
+const photoTitle = computed(() => {
+  if (photo.value?.context?.custom?.ai_description) {
+    // Take first sentence of AI description
+    return photo.value.context.custom.ai_description.split('.')[0]
+  }
+  // Fallback to date if available
+  if (photo.value?.humanReadableExifData?.date) {
+    return `Photo taken on ${photo.value.humanReadableExifData.date}`
+  }
+  return 'Photo by EJ Fox'
+})
+
+// Compute photo description
+const photoDescription = computed(() => {
+  const desc = []
+  const exif = photo.value?.humanReadableExifData
+  if (exif) {
+    if (exif.make && exif.model) desc.push(`Shot on ${exif.make} ${exif.model}`)
+    if (exif.exposure) desc.push(`${exif.exposure}`)
+    if (exif.aperture) desc.push(`${exif.aperture}`)
+    if (exif.focalLength) desc.push(`${exif.focalLength}`)
+  }
+  return desc.join(' · ') || 'A photograph by EJ Fox'
+})
+
+useHead({
+  title: photoTitle,
+  meta: [
+    { name: 'description', content: photoDescription },
+    { property: 'og:title', content: photoTitle },
+    { property: 'og:description', content: photoDescription },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:image', content: photo.value?.secure_url || '' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:site', content: '@mrejfox' },
+    { name: 'twitter:creator', content: '@mrejfox' }
+  ],
+  link: [
+    { rel: 'canonical', href: `https://photos.ejfox.com/${slug.value}` }
+  ]
+})
+
 </script>
 <style>
 .coordinates {
