@@ -218,11 +218,27 @@ const formatDate = (date: Date) => {
 }
 
 const formatMonthYear = (dateStr: string) => {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric'
-  })
+  // If the date is already in MMMM yyyy format, return it as is
+  if (dateStr.match(/^[A-Z][a-z]+ \d{4}$/)) {
+    return dateStr
+  }
+
+  // Handle potential invalid date strings
+  if (!dateStr) return 'No data'
+
+  try {
+    // Parse YYYY-MM format
+    const [year, month] = dateStr.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1) // month is 0-based
+
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    })
+  } catch (e) {
+    console.error('Error formatting date:', dateStr, e)
+    return 'Invalid date'
+  }
 }
 
 const dateRange = computed(() => {

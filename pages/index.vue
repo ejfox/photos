@@ -3,7 +3,7 @@
     class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y xl:snap-proximity overflow-x-hidden py-8 lg:py-32 mb-12">
 
     <div class="flex justify-center text-lg text-black dark:text-white">
-      <a href="/rss.xml" class="flex items-center">
+      <a href="/rss.xml" class="flex items-center text-black dark:text-white">
         <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
