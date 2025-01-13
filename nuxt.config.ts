@@ -36,7 +36,7 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
     "@pinia/nuxt",
     "@vueuse/nuxt",
-    "@nuxt/ui",
+    "@nuxtjs/tailwindcss",
     "@vueuse/motion/nuxt",
     [
       "@nuxtjs/google-fonts",
@@ -44,6 +44,7 @@ export default defineNuxtConfig({
         families: {
           Figtree: [400, 700],
           "Fira Code": [400, 700],
+          "Fjalla One": [400],
         },
       },
     ],

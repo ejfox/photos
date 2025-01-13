@@ -17,13 +17,11 @@
       <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto my-8 lg:my-32" alt="Made with love" />
     </a>
 
-
-
     <div class="photo-list flex flex-wrap px-2 lg:px-4">
       <div v-for="photo in photos" ref="photoRef"
         class="photo-container rounded-sm mx-auto snap-start snap-always py-12 lg:py-16 relative"
         :style="randomizedPhotoStyle(photo)" :id="`photo-${photo.public_id}`">
-        <NuxtLink :to="`/${photo?.public_id}`" class=" overflow-hidden">
+        <NuxtLink :to="`/${photo?.public_id}`" class="overflow-hidden">
           <LibraryPhoto :key="photo.public_id" :photo="photo" class="" />
           <!-- date metadata -->
           <div class="text-right text-xs text-gray-300 dark:text-gray-700/50 font-mono tracking-widest font-light">
@@ -31,9 +29,11 @@
           </div>
         </NuxtLink>
       </div>
+    </div>
 
-
-
+    <!-- Fixed navigation at bottom -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-sm">
+      <SiteNav />
     </div>
   </div>
 </template>
@@ -147,53 +147,8 @@ useHead({
 
 </script>
 <style>
-.dark a {
-  color: #a8dadc !important;
-  /* Light links for dark mode */
-}
-
-.dark a:visited {
-  color: #6a4c93 !important;
-  /* Purple for visited links, for dark mode */
-}
-
-.dark a:hover {
-  color: #457b9d !important;
-  /* Dark Blue for hovered links, for dark mode */
-}
-
-.dark a:focus {
-  outline: 2px dotted #DADADA !important;
-  /* Outline for keyboard users */
-}
-
-.dark a:active {
-  color: #1d3557 !important;
-  /* Darker blue color for active links in dark mode */
-}
-
-/* make an extremely simple, minimal button */
-button {
-  /* border: 1px solid #ccc; */
-  border: none;
-  border-radius: 3px;
-  padding: 0.25rem 0.55rem;
-  background: transparent;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-/* and for dark mode */
-
-.dark button {
-  /* border-color: #fff; */
-  border: none;
-  color: #fff;
-}
-
+/* Remove dark mode link overrides */
 .photo-container {
-  /* border-width: 1.2em; */
   transition: all 1200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -206,7 +161,6 @@ button {
   transform: rotate(0deg) scale(1.01) !important;
   /* transform: scale(1.005) !important; */
 }
-
 
 /* makes the photos overlap more like a stack of photos */
 .photo-list>* {
