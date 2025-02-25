@@ -2,7 +2,8 @@
   <div
     class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y xl:snap-proximity overflow-x-hidden py-8 lg:py-32 mb-12">
 
-    <div class="flex justify-center text-lg text-black dark:text-white">
+    <div class="flex flex-col items-center gap-3 mb-8">
+      <!-- RSS Link -->
       <a href="/rss.xml" class="flex items-center text-black dark:text-white">
         <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
@@ -11,6 +12,20 @@
         </svg>
         Subscribe to RSS
       </a>
+
+      <!-- Keyboard navigation indicator -->
+      <div class="text-xs font-mono text-gray-500 dark:text-gray-400 flex items-center gap-3">
+        <span class="flex items-center gap-1">
+          <kbd
+            class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">←</kbd>
+          <span>prev</span>
+        </span>
+        <span class="flex items-center gap-1">
+          <kbd
+            class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">→</kbd>
+          <span>next</span>
+        </span>
+      </div>
     </div>
 
     <a href="https://ejfox.com" class="block p-2 lg:p-8 mx-auto max-w-96 snap-center">
@@ -44,41 +59,78 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/en'; // or any other locale you prefer
 
 const route = useRoute()
+const router = useRouter()
 const photoRef = ref([])
 const numPhotos = ref(250)
+const currentIndex = ref(0) // Track current photo index directly
 
-// when the route changes, if it has a hash, scroll to that element
-onMounted(async () => {
-  await nextTick()
+// Set up keyboard navigation when component is mounted
+onMounted(() => {
+  // Add keyboard event listener
+  window.addEventListener('keydown', handleKeyDown)
+
+  // If there's a hash, find that photo
   if (route.hash) {
-    scrollToHash()
+    const id = route.hash.replace('#photo-', '')
+    const index = photos.value?.findIndex(p => p.public_id === id) || 0
+    if (index >= 0) {
+      currentIndex.value = index
+      // Wait for DOM to be ready
+      nextTick(() => {
+        scrollToCurrentPhoto()
+      })
+    }
   }
 })
 
-// watch the route hash and when it changes scroll to that element
-watch(() => route.hash, scrollToHash, { immediate: true })
+// Clean up event listener when component is unmounted
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
+})
 
-async function scrollToHash() {
-  const fileName = JSON.parse(JSON.stringify(route.hash)).replace('#photo-', '')
+// Handle keyboard navigation - extremely simple version
+function handleKeyDown(e) {
+  if (e.key === 'ArrowRight') {
+    e.preventDefault()
+    // Only increment if not at the end
+    if (currentIndex.value < (photos.value?.length || 0) - 1) {
+      currentIndex.value++
+      scrollToCurrentPhoto()
+    }
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault()
+    // Only decrement if not at the beginning
+    if (currentIndex.value > 0) {
+      currentIndex.value--
+      scrollToCurrentPhoto()
+    }
+  }
+}
 
-  // find the photoRef with the ID of the hash
-  const el = photoRef.value.find(photo => {
-    // get the ID of the attribute
-    const id = photo.getAttribute('id')
-    return id === `photo-${fileName}`
-  })
+// Scroll to the current photo
+function scrollToCurrentPhoto() {
+  if (!photoRef.value || photoRef.value.length === 0) return
+
+  const el = photoRef.value[currentIndex.value]
   if (el) {
-    // await new Promise(resolve => setTimeout(resolve, 250))
+    // Get the current photo's public_id
+    const currentPhoto = photos.value?.[currentIndex.value]
+    if (currentPhoto?.public_id) {
+      // Update the URL hash without triggering a page reload
+      const newHash = `photo-${currentPhoto.public_id}`
+      if (window.location.hash !== `#${newHash}`) {
+        window.history.replaceState(null, '', `#${newHash}`)
+      }
+    }
+
+    // Scroll to the element
     el.scrollIntoView({ behavior: 'smooth' })
   }
 }
 
 function formatDate(date) {
-  // return dayjs(date).locale('en').format('MMMM D, YYYY');
   return dayjs(date).locale('en').format('YYYY-MM-DD');
 }
-
-
 
 const { data: photos } = await useFetch('/api/cloudinary', {
   method: 'POST',
@@ -90,8 +142,6 @@ const { data: photos } = await useFetch('/api/cloudinary', {
     includeTags: true
   }
 })
-
-
 
 function randomizedPhotoStyle(photo) {
   const chance = new Chance()
@@ -142,8 +192,6 @@ useHead({
     { rel: 'canonical', href: 'https://photos.ejfox.com' }
   ]
 })
-
-
 
 </script>
 <style>

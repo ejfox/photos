@@ -10,10 +10,10 @@
 
     <!-- Back button -->
     <div class="p-12 lg:p-24">
-      <UButton :to="`/#photo-${photo?.public_id}`" variant="ghost"
+      <NuxtLink :to="`/#photo-${photo?.public_id}`" variant="ghost"
         class="text-xs font-mono tracking-tight opacity-50 hover:opacity-100 transition-opacity">
         ← Back to photos
-      </UButton>
+      </NuxtLink>
     </div>
 
     <div class="space-y-24">

@@ -1,10 +1,19 @@
-// server/routes/rss.ts
+// server/routes/rss.xml.ts
 import { defineEventHandler } from "h3";
 import { format } from "date-fns";
 
 const siteURL = "https://ejfox.photos";
 const siteName = "EJ Fox Photos";
 const siteDescription = "Photography by EJ Fox";
+
+// Define interface for photo objects
+interface CloudinaryPhoto {
+  id: string;
+  public_id: string;
+  created_at: string;
+  secure_url: string;
+  filename: string;
+}
 
 // Escape special XML characters to prevent malformed RSS
 function escapeXml(unsafe: string): string {
@@ -28,12 +37,12 @@ function escapeXml(unsafe: string): string {
 
 export default defineEventHandler(async (event) => {
   try {
-    const photos = await $fetch("/api/cloudinary", {
+    const photos = await $fetch<CloudinaryPhoto[]>("/api/cloudinary", {
       method: "POST",
-      body: JSON.stringify({
+      body: {
         numPhotos: 24,
         onlyPhotoblog: true,
-      }),
+      },
     });
 
     const rss = `<?xml version="1.0" encoding="UTF-8"?>
@@ -45,8 +54,9 @@ export default defineEventHandler(async (event) => {
   <atom:link href="${siteURL}/rss.xml" rel="self" type="application/rss+xml" />
   <pubDate>${new Date().toUTCString()}</pubDate>
   ${photos
-    .map((photo) => {
+    .map((photo: CloudinaryPhoto) => {
       const title = format(new Date(photo.created_at), "yyyy-MM-dd");
+      const photoUrl = `${siteURL}/${photo.public_id}`;
       const imageUrl = photo.secure_url;
       const content = `<img src="${imageUrl}" alt="${escapeXml(
         photo.filename
@@ -54,8 +64,8 @@ export default defineEventHandler(async (event) => {
 
       return `<item>
       <title>${escapeXml(title)}</title>
-      <link>${escapeXml(imageUrl)}</link>
-      <guid isPermaLink="true">${escapeXml(imageUrl)}</guid>
+      <link>${escapeXml(photoUrl)}</link>
+      <guid isPermaLink="true">${escapeXml(photoUrl)}</guid>
       <pubDate>${new Date(photo.created_at).toUTCString()}</pubDate>
       <content:encoded><![CDATA[${content}]]></content:encoded>
     </item>`;

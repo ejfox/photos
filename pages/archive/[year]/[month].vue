@@ -1,50 +1,55 @@
 <template>
   <div class="min-h-screen bg-white dark:bg-black text-black dark:text-white">
-    <div class="max-w-7xl mx-auto px-4 py-12 lg:py-16 space-y-16">
-      <!-- Header with month/year and navigation -->
-      <header class="flex items-center justify-between">
-        <div class="space-y-2">
-          <h1 class="text-4xl font-bold tracking-tight">{{ formattedDate }}</h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">
-            {{ data?.totalPhotos }} photos
+    <SiteNav />
+    <div class="max-w-7xl mx-auto px-4 py-12 lg:py-16">
+      <!-- Minimal header with month/year and navigation -->
+      <header class="flex items-center justify-between mb-16">
+        <div class="space-y-1">
+          <h1 class="text-2xl font-light tracking-tight">{{ formattedDate }}</h1>
+          <p class="text-xs font-mono text-gray-500 dark:text-gray-400">
+            {{ data?.totalPhotos }} photographs
           </p>
         </div>
 
-        <div class="flex gap-4">
-          <UButton v-if="previousMonth" :to="previousMonthLink" variant="ghost" class="text-sm font-mono">
+        <div class="flex gap-6">
+          <NuxtLink v-if="previousMonth" :to="previousMonthLink"
+            class="text-xs font-mono text-gray-500 hover:text-black dark:hover:text-white transition-colors">
             ← {{ previousMonth }}
-          </UButton>
-          <UButton v-if="nextMonth" :to="nextMonthLink" variant="ghost" class="text-sm font-mono">
+          </NuxtLink>
+          <NuxtLink v-if="nextMonth" :to="nextMonthLink"
+            class="text-xs font-mono text-gray-500 hover:text-black dark:hover:text-white transition-colors">
             {{ nextMonth }} →
-          </UButton>
+          </NuxtLink>
         </div>
       </header>
 
       <!-- Loading state -->
       <div v-if="pending" class="flex items-center justify-center h-64">
-        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900 dark:border-gray-100">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 dark:border-gray-100">
         </div>
       </div>
 
       <div v-else>
         <!-- No photos message -->
         <div v-if="!data?.photos?.length" class="text-center py-24">
-          <p class="text-xl text-gray-500 dark:text-gray-400 mb-6">No photos found for this month</p>
-          <UButton to="/archive" variant="ghost" class="font-mono">View All Archives</UButton>
+          <p class="text-sm font-mono text-gray-500 dark:text-gray-400 mb-6">No photographs found</p>
+          <NuxtLink to="/archive" class="text-xs font-mono underline">Return to archives</NuxtLink>
         </div>
 
-        <!-- Photo grid -->
-        <div v-else class="photo-list flex flex-wrap">
-          <NuxtLink v-for="photo in data.photos" :key="photo.id" :to="`/${photo.public_id}`"
-            class="photo-container w-full md:w-2/3 lg:w-1/2 xl:w-1/3 p-8 lg:p-12" :style="randomizedPhotoStyle(photo)">
-            <div class="relative bg-gray-100 dark:bg-gray-900 rounded-sm overflow-hidden">
+        <!-- Photo grid - clean and minimal -->
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          <div v-for="photo in data.photos" :key="photo.id" class="space-y-2">
+            <!-- Photo without text overlay -->
+            <NuxtLink :to="`/${photo.public_id}`" class="block">
               <img :src="photo.secure_url.replace('/upload/', '/upload/w_1200/')" :alt="formatDate(photo.date)"
                 class="w-full h-auto" loading="lazy" />
-              <time class="absolute bottom-0 right-0 p-4 text-xs font-mono text-white/50">
-                {{ formatDate(photo.date) }}
-              </time>
+            </NuxtLink>
+
+            <!-- Metadata below image -->
+            <div class="text-xs font-mono text-gray-500 dark:text-gray-400 pt-2">
+              {{ formatDate(photo.date) }}
             </div>
-          </NuxtLink>
+          </div>
         </div>
       </div>
     </div>

@@ -50,21 +50,26 @@ const exifColumns = [
 ]
 
 onActivated(() => {
-  // console.log(props.photo.exifData)
-  if (props.photo.exifData) {
+  // Check if we already have EXIF data from the photo prop
+  if (props.photo?.exifData) {
     exifData.value = props.photo.humanReadableExifData
-    console.log(exifData.value)
-  } else {
-    // make sure we aren't on /
-    if (route.value?.path !== '/' && !props.photo.exifData && route.value?.path !== '/admin') {
-      // fetchExifData()
-    }
+    console.log('Using existing EXIF data:', exifData.value)
+  }
+  // Check if we have EXIF data from the API call
+  else if (exifApiData.value) {
+    exifData.value = exifApiData.value.humanReadableExifData
+    console.log('Using API EXIF data:', exifData.value)
+  }
+  // If we don't have EXIF data and we're not on the home or admin page, fetch it
+  else if (route.value?.path !== '/' && route.value?.path !== '/admin' && props.photo?.public_id) {
+    console.log('Refreshing EXIF data for:', props.photo.public_id)
+    exifApiData.value?.refresh?.()
   }
 })
 
 // make a computed that checks the photo tags for 'photo-blog'
 const isPhotoBlog = computed(() => {
-  return data.value.tags.includes('photo-blog')
+  return props.photo?.tags?.includes('photo-blog') || false
 })
 
 const imageBgColor = computed(() => {
@@ -95,13 +100,38 @@ function cloudinaryThumb(rawHref) {
   }
 }
 
-const { data, pending, error, refresh } = useAsyncData(async () => {
-  return await fetch('/api/cloudinary-exif', {
-    method: 'POST',
-    body: JSON.stringify({ resourceId: props.photo.public_id })
-  })
-})
+const { data: exifApiData, pending: exifPending, error: exifError } = useAsyncData(
+  () => {
+    // Skip the API call if we don't have a valid photo object or public_id
+    if (!props.photo || !props.photo.public_id) {
+      console.log('Skipping EXIF fetch - no valid public_id')
+      return Promise.resolve(null)
+    }
 
+    return $fetch('/api/cloudinary-exif', {
+      method: 'POST',
+      body: { resourceId: props.photo.public_id }
+    }).catch(err => {
+      console.error('Error fetching EXIF data:', err)
+      return null
+    })
+  },
+  {
+    // Add a unique key based on the photo ID
+    key: `exif-${props.photo?.public_id || 'unknown'}`,
+    // Only run this on the client side
+    server: false,
+    // Don't immediately fetch on page load
+    immediate: false
+  }
+)
+
+// Only fetch EXIF data when the component is activated and we have a valid photo
+onMounted(() => {
+  if (props.photo?.public_id && route.value?.path !== '/' && route.value?.path !== '/admin') {
+    exifApiData.value?.refresh?.()
+  }
+})
 
 </script>
 
