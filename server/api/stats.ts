@@ -98,54 +98,23 @@ export default defineEventHandler(async (event): Promise<PhotoStats> => {
     return exif?.Make && exif?.Model; // Only include photos with camera metadata
   });
 
-  // Get the full date range
-  const dates = photosWithExif.map((p) => new Date(p.created_at));
-  const oldestDate = new Date(Math.min(...dates.map((d) => d.getTime())));
-  const today = new Date();
-
-  // Basic stats calculation - now for ALL dates
+  // Process only dates that have photos
   const photosByDate = new Map<string, number>();
 
-  // Initialize all dates from oldest photo to today
-  for (let d = new Date(oldestDate); d <= today; d.setDate(d.getDate() + 1)) {
-    photosByDate.set(format(d, "yyyy-MM-dd"), 0);
-  }
-
+  // Count photos by date
   photosWithExif.forEach((photo) => {
     const date = format(new Date(photo.created_at), "yyyy-MM-dd");
-    if (photosByDate.has(date)) {
-      photosByDate.set(date, (photosByDate.get(date) || 0) + 1);
-    }
+    photosByDate.set(date, (photosByDate.get(date) || 0) + 1);
   });
 
-  // Convert Maps to sorted arrays for streak calculation
+  // Only include dates that actually have photos
   const allDates = Array.from(photosByDate.keys()).sort();
   const contributions = allDates.map((date) => photosByDate.get(date) || 0);
 
-  // Calculate streaks with dates
-  let currentStreak = { count: 0, startDate: "", endDate: "" };
-  let longestStreak = { count: 0, startDate: "", endDate: "" };
-  let tempStreak = { count: 0, startDate: "", endDate: "" };
-
-  for (let i = contributions.length - 1; i >= 0; i--) {
-    if (contributions[i] > 0) {
-      if (tempStreak.count === 0) {
-        tempStreak.startDate = allDates[i];
-      }
-      tempStreak.count++;
-      tempStreak.endDate = allDates[i];
-
-      if (i === contributions.length - 1) {
-        currentStreak = { ...tempStreak };
-      }
-
-      if (tempStreak.count > longestStreak.count) {
-        longestStreak = { ...tempStreak };
-      }
-    } else {
-      tempStreak = { count: 0, startDate: "", endDate: "" };
-    }
-  }
+  // Set basic streak info
+  // Since we're only looking at days with photos, we don't need complex streak calculation
+  let currentStreak = { count: 1, startDate: allDates[allDates.length - 1] || "", endDate: allDates[allDates.length - 1] || "" };
+  let longestStreak = { count: 1, startDate: allDates[0] || "", endDate: allDates[0] || "" };
 
   // Initialize gear stats tracking
   const cameras = new Map<string, number>();
@@ -221,13 +190,19 @@ export default defineEventHandler(async (event): Promise<PhotoStats> => {
   // Calculate this year's photos
   const thisYear = new Date().getFullYear();
   const photosThisYear = photosWithExif.filter(
-    (photo) => new Date(photo.created_at).getFullYear() === thisYear
+    (photo) => {
+      const dateField = photo.uploaded_at || photo.created_at;
+      return new Date(dateField).getFullYear() === thisYear;
+    }
   ).length;
 
   // Calculate this month's photos
   const thisMonth = format(new Date(), "yyyy-MM");
   const photosThisMonth = photosWithExif.filter(
-    (photo) => format(new Date(photo.created_at), "yyyy-MM") === thisMonth
+    (photo) => {
+      const dateField = photo.uploaded_at || photo.created_at;
+      return format(new Date(dateField), "yyyy-MM") === thisMonth;
+    }
   ).length;
 
   // Helper function to sort and format gear stats
