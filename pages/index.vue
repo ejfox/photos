@@ -1,31 +1,11 @@
 <template>
   <div
-    class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y xl:snap-proximity overflow-x-hidden py-8 lg:py-32 mb-12"
-  >
+    class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y xl:snap-proximity overflow-x-hidden py-4 md:py-8 lg:py-32 mb-4 md:mb-8 lg:mb-12">
     <div class="flex flex-col items-center gap-3 mb-8">
-      <!-- RSS Link -->
-      <a href="/rss.xml" class="flex items-center text-black dark:text-white">
-        <svg
-          class="w-4 h-4 mr-2"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 110-2 1 1 0 010 2z"
-          />
-        </svg>
-        RSS
-      </a>
+
 
       <!-- Keyboard navigation indicator -->
-      <div
-        class="text-xs font-mono text-gray-500 dark:text-gray-400 flex items-center gap-3"
-      >
+      <div class="text-xs font-mono text-gray-500 dark:text-gray-400 flex items-center gap-3">
         <span class="flex items-center gap-1">
           <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">←</kbd>
           <span>prev</span>
@@ -37,42 +17,35 @@
       </div>
     </div>
 
-    <a
-      href="https://ejfox.com"
-      class="block p-2 lg:p-8 mx-auto max-w-32 snap-center"
-    >
-      <img
-        src="/handdrawn__MadeWithLove.svg"
-        class="dark:invert mx-auto my-8 lg:my-32"
-        alt="Made with love"
-      />
-    </a>
+
 
     <div class="photo-list flex flex-wrap px-2 lg:px-4">
-      <div
-        v-for="photo in photos"
-        ref="photoRef"
-        class="photo-container rounded-sm mx-auto snap-start snap-always py-12 lg:py-16 relative"
-        :style="randomizedPhotoStyle(photo)"
-        :id="`photo-${photo.public_id}`"
-      >
-        <NuxtLink :to="`/${photo?.public_id}`" class="overflow-hidden">
+      <div v-for="(photo, idx) in photos" ref="photoRef" :class="[
+        'photo-container rounded-sm mx-auto snap-start snap-always py-12 lg:py-16 relative transition-opacity ease-out duration-1000',
+        visibleIndices.has(idx) ? 'opacity-100' : 'opacity-0'
+      ]" :style="randomizedPhotoStyle(photo)" :id="`photo-${photo.public_id}`">
+        <NuxtLink :to="`/${photo?.public_id}`" class="overflow-hidden" :data-photo-id="photo.public_id"
+          @click="storePhotoState(photo.public_id)">
           <LibraryPhoto :key="photo.public_id" :photo="photo" class="" />
           <!-- date metadata -->
-          <div
-            class="text-right text-xs text-gray-300 dark:text-gray-700/50 font-mono tracking-widest font-light"
-          >
+          <div class="text-right text-xs text-gray-300 dark:text-gray-700/50 font-mono tracking-widest font-light">
             {{ formatDate(photo.created_at) }}
           </div>
         </NuxtLink>
       </div>
     </div>
 
-    <!-- Fixed navigation at bottom -->
+    <!-- Footer row: photos by EJ Fox + SVG -->
     <div
-      class="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-sm"
-    >
+      class="flex flex-col items-center justify-center gap-2 py-4 lg:flex-row lg:justify-center lg:items-center lg:gap-4">
+      <span class="font-mono text-xs text-gray-500 dark:text-gray-400">photos by EJ Fox</span>
+      <img src="/handdrawn__MadeWithLove.svg" class="dark:invert h-6" alt="Made with love" />
+    </div>
+
+    <!-- Fixed navigation at bottom -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-sm">
       <SiteNav />
+
     </div>
   </div>
 </template>
@@ -81,10 +54,12 @@
 import Chance from "chance";
 import dayjs from "dayjs";
 import "dayjs/locale/en"; // or any other locale you prefer
+import { useIntersectionObserver } from "@vueuse/core";
 
 const route = useRoute();
 const photoRef = ref([]);
 const currentIndex = ref(0); // Track current photo index directly
+const visibleIndices = ref(new Set()); // Track which photos have entered the viewport
 
 // Set up keyboard navigation when component is mounted
 onMounted(() => {
@@ -103,6 +78,38 @@ onMounted(() => {
       });
     }
   }
+
+  // Restore scroll position if coming back from detail view
+  const id = sessionStorage.getItem('lastPhotoId')
+  const scroll = sessionStorage.getItem('lastScroll')
+  if (id && scroll) {
+    const el = document.querySelector(`[data-photo-id="${id}"]`)
+    if (el) el.scrollIntoView({ behavior: 'auto', block: 'center' })
+    window.scrollTo(0, Number(scroll))
+    sessionStorage.removeItem('lastPhotoId')
+    sessionStorage.removeItem('lastScroll')
+  }
+
+  // Set up fade-in intersection observers once DOM is ready
+  nextTick(() => {
+    photoRef.value.forEach((el, idx) => {
+      if (!el) return;
+      useIntersectionObserver(
+        el,
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            // Mark as seen for fade-in
+            visibleIndices.value.add(idx);
+            // Update active index for keyboard nav
+            currentIndex.value = idx;
+          }
+        },
+        {
+          threshold: 0.6, // more than half visible counts as active
+        }
+      );
+    });
+  });
 });
 
 // Clean up event listener when component is unmounted
@@ -199,6 +206,11 @@ function randomizedPhotoStyle(photo) {
   };
 }
 
+function storePhotoState(id) {
+  sessionStorage.setItem('lastPhotoId', id)
+  sessionStorage.setItem('lastScroll', window.scrollY)
+}
+
 useHead({
   title: "EJ Fox Photography",
   meta: [
@@ -228,23 +240,12 @@ useHead({
   transition: all 1200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.photo-container:hover {
-  /* transform: rotate(0deg) scale(1) !important; */
-  /* transform: scale(1.005) !important; */
-}
-
-.photo-container:active {
-  transform: rotate(0deg) scale(1.01) !important;
-  /* transform: scale(1.005) !important; */
-}
-
 /* makes the photos overlap more like a stack of photos */
-.photo-list > * {
+.photo-list>* {
   z-index: 1;
 }
 
-.photo-list > *:nth-child(odd) {
+.photo-list>*:nth-child(odd) {
   z-index: 2;
 }
 </style>
-
