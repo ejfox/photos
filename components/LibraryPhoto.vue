@@ -1,15 +1,10 @@
 <template>
-  <div
-    :class="[
-      'cursor-pointer transition-opacity duration-500',
-      copied ? 'opacity-50' : 'opacity-100',
-    ]"
-  >
-    <img
-      :src="cloudinaryThumb(imageUrl)"
-      :alt="photo.public_id"
-      class="cloudinary-img w-full h-auto border-2 border-black dark:border-white mx-auto my-0"
-    />
+  <div :class="[
+    'cursor-pointer transition-opacity duration-500',
+    copied ? 'opacity-50' : 'opacity-100',
+  ]">
+    <img :src="cloudinaryThumb(imageUrl)" :alt="photo.public_id"
+      class="cloudinary-img w-full h-auto border-2 border-black dark:border-white mx-auto my-0" />
   </div>
 </template>
 
@@ -20,9 +15,14 @@ import { useClipboard } from "@vueuse/core";
 const props = defineProps({
   photo: Object,
   cropType: String,
+  fullRes: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const cropType = toRef(props, "cropType");
+const fullRes = toRef(props, "fullRes");
 const { copy, copied } = useClipboard();
 // const width = 1080
 const width = ref(1080);
@@ -95,6 +95,10 @@ const imageUrl = computed(() => {
 function cloudinaryThumb(rawHref) {
   if (!rawHref) return;
 
+  if (fullRes.value === true) {
+    return rawHref;
+  }
+
   if (cropType.value === "fill") {
     return rawHref.replace(
       "upload/",
@@ -166,4 +170,3 @@ onMounted(() => {
   /* border-width: 1.618vw; */
 }
 </style>
-
