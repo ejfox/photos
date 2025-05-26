@@ -3,6 +3,10 @@
     'cursor-pointer transition-opacity duration-500',
     copied ? 'opacity-50' : 'opacity-100',
   ]">
+    <img 
+      :src="cloudinaryThumb(imageUrl)" 
+      :srcset="cloudinarySrcset(imageUrl)"
+      :alt="photo.public_id"
       class="cloudinary-img w-full h-auto border-2 border-black dark:border-white mx-auto my-0" />
   </div>
 </template>
@@ -32,7 +36,12 @@ const route = useRoute();
 
 onMounted(() => {
   const { width: windowWidth } = useWindowSize();
-  width.value = windowWidth.value;
+  width.value = Math.min(windowWidth.value, 1200); // Cap at reasonable max for performance
+  
+  // Update width when window resizes
+  watch(windowWidth, (newWidth) => {
+    width.value = Math.min(newWidth, 1200);
+  });
 });
 
 const exifAsRows = computed(() => {
@@ -109,7 +118,33 @@ function cloudinaryThumb(rawHref) {
       `upload/c_pad,w_${width.value},h_${width.value},b_rgb:${imageBgColor.value}/`,
     );
   } else {
-    return rawHref.replace("upload/", `upload/w_${width.value}/dpr_auto/`);
+    return rawHref.replace("upload/", `upload/w_${width.value},c_limit,q_auto,f_auto/`);
+  }
+}
+
+function cloudinarySrcset(rawHref) {
+  if (!rawHref || fullRes.value === true) return;
+
+  const baseWidth = width.value;
+  
+  if (cropType.value === "fill") {
+    return [
+      rawHref.replace("upload/", `upload/g_object,c_fill,w_${baseWidth},h_${baseWidth},ar_1:1,z_1.5,dpr_1.0/`) + " 1x",
+      rawHref.replace("upload/", `upload/g_object,c_fill,w_${baseWidth},h_${baseWidth},ar_1:1,z_1.5,dpr_2.0/`) + " 2x",
+      rawHref.replace("upload/", `upload/g_object,c_fill,w_${baseWidth},h_${baseWidth},ar_1:1,z_1.5,dpr_3.0/`) + " 3x"
+    ].join(", ");
+  } else if (cropType.value === "pad") {
+    return [
+      rawHref.replace("upload/", `upload/c_pad,w_${baseWidth},h_${baseWidth},b_rgb:${imageBgColor.value},dpr_1.0/`) + " 1x",
+      rawHref.replace("upload/", `upload/c_pad,w_${baseWidth},h_${baseWidth},b_rgb:${imageBgColor.value},dpr_2.0/`) + " 2x",
+      rawHref.replace("upload/", `upload/c_pad,w_${baseWidth},h_${baseWidth},b_rgb:${imageBgColor.value},dpr_3.0/`) + " 3x"
+    ].join(", ");
+  } else {
+    return [
+      rawHref.replace("upload/", `upload/w_${baseWidth},c_limit,q_auto,f_auto,dpr_1.0/`) + " 1x",
+      rawHref.replace("upload/", `upload/w_${baseWidth},c_limit,q_auto,f_auto,dpr_2.0/`) + " 2x",
+      rawHref.replace("upload/", `upload/w_${baseWidth},c_limit,q_auto,f_auto,dpr_3.0/`) + " 3x"
+    ].join(", ");
   }
 }
 
