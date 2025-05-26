@@ -3,7 +3,6 @@
     'cursor-pointer transition-opacity duration-500',
     copied ? 'opacity-50' : 'opacity-100',
   ]">
-    <img :src="cloudinaryThumb(imageUrl)" :alt="photo.public_id"
       class="cloudinary-img w-full h-auto border-2 border-black dark:border-white mx-auto my-0" />
   </div>
 </template>
