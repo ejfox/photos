@@ -5,6 +5,9 @@ export default defineNuxtConfig({
   experimental: {
     viewTransition: true,
   },
+  nitro: {
+    preset: 'node-server'
+  },
   app: {
     head: {
       title: pkg.name,
