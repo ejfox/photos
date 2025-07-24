@@ -5,9 +5,11 @@ export default defineNuxtConfig({
   experimental: {
     viewTransition: true,
   },
+
   nitro: {
     preset: 'node-server'
   },
+
   app: {
     head: {
       title: pkg.name,
@@ -18,6 +20,7 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   // ssr: false, // for netlify deploy
   // devtools: { enabled: true },
   css: [
@@ -67,6 +70,7 @@ export default defineNuxtConfig({
     //   },
     // ]
   ],
+
   runtimeConfig: {
     // add the openai api key to the runtime config
     public: {
@@ -74,4 +78,6 @@ export default defineNuxtConfig({
       PRODUCTION: process.env.PRODUCTION,
     },
   },
+
+  compatibilityDate: "2025-07-08",
 });

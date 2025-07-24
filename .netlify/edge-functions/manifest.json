@@ -5,7 +5,7 @@
       "path": "/*",
       "name": "nitro server handler",
       "function": "server",
-      "generator": "nitropack@2.8.1"
+      "generator": "nitropack@2.9.7"
     }
   ]
 }
