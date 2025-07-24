@@ -2,7 +2,7 @@
 import { defineEventHandler } from "h3";
 import { format } from "date-fns";
 
-const siteURL = "https://ejfox.photos";
+const siteURL = "https://photos.ejfox.com";
 const siteName = "EJ Fox Photos";
 const siteDescription = "Photography by EJ Fox";
 
