@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   photos:
-    build: 
+    build:
       context: .
     image: photos:latest
     container_name: photos-prod

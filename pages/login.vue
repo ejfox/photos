@@ -1,22 +1,11 @@
-<script setup lang="ts">
-const supabase = useSupabaseClient()
-const email = ref('')
-
-const signInWithOtp = async () => {
-  const { error } = await supabase.auth.signInWithOtp({
-    email: email.value,
-    options: {
-      emailRedirectTo: 'http://localhost:3000/confirm',
-    }
-  })
-  if (error) console.log(error)
-}
-</script>
 <template>
-  <div>
-    <button @click="signInWithOtp">
-      Sign In with E-Mail
-    </button>
-    <input v-model="email" type="email" />
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+      <h1 class="text-2xl font-bold mb-4">Login</h1>
+      <p class="text-gray-600">Authentication has been removed from this app.</p>
+      <NuxtLink to="/" class="text-blue-500 hover:underline mt-4 inline-block">
+        Return Home
+      </NuxtLink>
+    </div>
   </div>
 </template>
