@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     console.log(
-      `Removing tag ${tag} from asset with resource ID: ${resourceId}`
+      `Removing tag ${tag} from asset with resource ID: ${resourceId}`,
     );
 
     const result = await cloudinary.uploader.remove_tag(tag, [resourceId]);

@@ -34,7 +34,7 @@ export default defineEventHandler(async (event): Promise<CalendarDay[]> => {
       id: photo.asset_id,
       thumbnail: photo.secure_url.replace(
         "/upload/",
-        "/upload/w_150,h_150,c_fill/"
+        "/upload/w_150,h_150,c_fill/",
       ),
       date,
       public_id: photo.public_id,

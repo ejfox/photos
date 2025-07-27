@@ -87,7 +87,7 @@ export default defineEventHandler(async (event): Promise<PhotoStats> => {
     $fetch("/api/cloudinary-exif", {
       method: "POST",
       body: { resourceId: photo.public_id },
-    })
+    }),
   );
 
   const exifResults = await Promise.all(exifPromises);
@@ -113,8 +113,16 @@ export default defineEventHandler(async (event): Promise<PhotoStats> => {
 
   // Set basic streak info
   // Since we're only looking at days with photos, we don't need complex streak calculation
-  let currentStreak = { count: 1, startDate: allDates[allDates.length - 1] || "", endDate: allDates[allDates.length - 1] || "" };
-  let longestStreak = { count: 1, startDate: allDates[0] || "", endDate: allDates[0] || "" };
+  let currentStreak = {
+    count: 1,
+    startDate: allDates[allDates.length - 1] || "",
+    endDate: allDates[allDates.length - 1] || "",
+  };
+  let longestStreak = {
+    count: 1,
+    startDate: allDates[0] || "",
+    endDate: allDates[0] || "",
+  };
 
   // Initialize gear stats tracking
   const cameras = new Map<string, number>();
@@ -157,14 +165,14 @@ export default defineEventHandler(async (event): Promise<PhotoStats> => {
     if (exif?.PhotographicSensitivity) {
       isoValues.set(
         exif.PhotographicSensitivity,
-        (isoValues.get(exif.PhotographicSensitivity) || 0) + 1
+        (isoValues.get(exif.PhotographicSensitivity) || 0) + 1,
       );
     }
 
     if (hr?.focalLength) {
       focalLengths.set(
         hr.focalLength,
-        (focalLengths.get(hr.focalLength) || 0) + 1
+        (focalLengths.get(hr.focalLength) || 0) + 1,
       );
     }
 
@@ -184,32 +192,28 @@ export default defineEventHandler(async (event): Promise<PhotoStats> => {
   const mostActiveMonth = Array.from(photosByMonth.entries()).reduce(
     (max, [month, count]) =>
       count > (max.count || 0) ? { month, count } : max,
-    { month: "", count: 0 }
+    { month: "", count: 0 },
   );
 
   // Calculate this year's photos
   const thisYear = new Date().getFullYear();
-  const photosThisYear = photosWithExif.filter(
-    (photo) => {
-      const dateField = photo.uploaded_at || photo.created_at;
-      return new Date(dateField).getFullYear() === thisYear;
-    }
-  ).length;
+  const photosThisYear = photosWithExif.filter((photo) => {
+    const dateField = photo.uploaded_at || photo.created_at;
+    return new Date(dateField).getFullYear() === thisYear;
+  }).length;
 
   // Calculate this month's photos
   const thisMonth = format(new Date(), "yyyy-MM");
-  const photosThisMonth = photosWithExif.filter(
-    (photo) => {
-      const dateField = photo.uploaded_at || photo.created_at;
-      return format(new Date(dateField), "yyyy-MM") === thisMonth;
-    }
-  ).length;
+  const photosThisMonth = photosWithExif.filter((photo) => {
+    const dateField = photo.uploaded_at || photo.created_at;
+    return format(new Date(dateField), "yyyy-MM") === thisMonth;
+  }).length;
 
   // Helper function to sort and format gear stats
   const formatGearStats = (map: Map<string, number>) => {
     const total = Array.from(map.values()).reduce(
       (sum, count) => sum + count,
-      0
+      0,
     );
     return Array.from(map.entries())
       .map(([name, count]) => ({
@@ -222,7 +226,7 @@ export default defineEventHandler(async (event): Promise<PhotoStats> => {
 
   // Helper function to sort and format setting stats with proper typing
   const formatSettingStats = <T extends string | number>(
-    map: Map<T, number>
+    map: Map<T, number>,
   ) => {
     return Array.from(map.entries())
       .map(([value, count]) => ({ value, count }))

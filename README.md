@@ -14,7 +14,7 @@ This project arose from the author's need for a better way to organize and publi
 
 ## Web Interface with Nuxt.js:
 
-The files stored on Cloudinary are fetched back for viewing on a web interface built with Nuxt.js. Server-side coding is implemented to securely access Cloudinary with private keys and retrieve the media. It also features a Nuxt Server API which fetches the latest photos when the endpoint `/api/latest-photos` is accessed. 
+The files stored on Cloudinary are fetched back for viewing on a web interface built with Nuxt.js. Server-side coding is implemented to securely access Cloudinary with private keys and retrieve the media. It also features a Nuxt Server API which fetches the latest photos when the endpoint `/api/latest-photos` is accessed.
 
 Overall, this is a fully functional and efficient media organizing system that follows the author's personalized approach to manage a large collection of files and present them in an organized and pleasant web gallery built on Nuxt.js.
 
@@ -63,15 +63,19 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 This endpoint retrieves lite information about all photos stored in Cloudinary.
 
 #### Request Method:
+
 - `GET`
 
 #### Response:
+
 The response will be a JSON array containing objects with the following fields for each photo:
+
 - `public_id`: The unique identifier for the photo in Cloudinary.
 - `secure_url`: The secure URL to access the photo.
 - `created_at`: The date and time when the photo was uploaded.
 
 #### Example Response:
+
 ```json
 [
   {

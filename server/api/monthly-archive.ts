@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
     id: photo.asset_id,
     thumbnail: photo.secure_url.replace(
       "/upload/",
-      "/upload/w_400,h_400,c_fill/"
+      "/upload/w_400,h_400,c_fill/",
     ),
     date: format(new Date(photo.created_at), "yyyy-MM-dd"),
     public_id: photo.public_id,

@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
       const photoUrl = `${siteURL}/${photo.public_id}`;
       const imageUrl = photo.secure_url;
       const content = `<img src="${imageUrl}" alt="${escapeXml(
-        photo.filename
+        photo.filename,
       )}" />`;
 
       return `<item>

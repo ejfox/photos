@@ -1,29 +1,29 @@
 <template>
   <div
-    class="dark:bg-black dark:text-white snap-y xl:snap-proximity overflow-x-hidden py-4 md:py-8 lg:py-32 mb-4 md:mb-8 lg:mb-12"
+    class="dark:bg-black dark:text-white snap-y xl:snap-proximity overflow-x-hidden py-8 lg:py-16"
   >
-    <div class="flex flex-col items-center gap-3 mb-8">
+    <div class="flex flex-col items-center gap-4 mb-8">
       <!-- Keyboard navigation indicator -->
       <div
-        class="text-xs font-mono text-gray-500 dark:text-gray-400 flex items-center gap-3"
+        class="text-xs font-mono text-gray-500 dark:text-gray-400 flex items-center gap-4"
       >
-        <span class="flex items-center gap-1">
+        <span class="flex items-center gap-2">
           <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">←</kbd>
           <span>prev</span>
         </span>
-        <span class="flex items-center gap-1">
+        <span class="flex items-center gap-2">
           <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">→</kbd>
           <span>next</span>
         </span>
       </div>
     </div>
 
-    <div class="photo-list flex flex-wrap px-2 lg:px-4">
+    <div class="photo-list flex flex-wrap max-w-6xl mx-auto px-4 lg:px-8">
       <div
         v-for="(photo, idx) in photos"
         ref="photoRef"
         :class="[
-          'photo-container rounded-sm mx-auto snap-start snap-always py-12 lg:py-16 relative transition-opacity ease-out duration-1000',
+          'photo-container rounded-sm mx-auto snap-start snap-always py-8 relative transition-opacity ease-out duration-1000',
           visibleIndices.has(idx) ? 'opacity-100' : 'opacity-0',
         ]"
         :style="randomizedPhotoStyle(photo)"
@@ -187,7 +187,7 @@ function formatDate(date) {
   return dayjs(date).locale("en").format("YYYY-MM-DD");
 }
 
-const { data: photos } = await useFetch("/api/cloudinary", {
+const photos = await $fetch("/api/cloudinary", {
   method: "POST",
   body: {
     filterOutScreenshots: true,

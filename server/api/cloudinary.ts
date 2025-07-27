@@ -1,21 +1,22 @@
 // server/api/cloudinary.ts
-import { defineEventHandler } from "h3";
+import { defineEventHandler, readBody, createError } from "h3";
 import { v2 as cloudinary } from "cloudinary";
 
-// Track if we've already configured Cloudinary
-let isConfigured = false;
-
-function setupCloudinary() {
-  if (isConfigured) return;
-
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-
-  isConfigured = true;
-  console.log("Cloudinary configured successfully");
+// Configure Cloudinary once at module level using environment variable or individual vars
+if (!cloudinary.config().cloud_name) {
+  const cloudinaryUrl = process.env.CLOUDINARY_URL;
+  if (cloudinaryUrl) {
+    // Use CLOUDINARY_URL if available (recommended)
+    cloudinary.config(cloudinaryUrl);
+  } else {
+    // Fallback to individual env vars
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  }
+  console.log("Cloudinary configured");
 }
 
 interface CloudinaryResource {
@@ -29,117 +30,132 @@ interface CloudinaryResource {
       updated_at?: string;
     };
   };
+  width?: number;
+  height?: number;
+  format?: string;
+  bytes?: number;
+}
+
+interface SearchRequestBody {
+  numPhotos?: number;
+  filterOutScreenshots?: boolean;
+  onlyScreenshots?: boolean;
+  onlyPhotoblog?: boolean;
+  includeContext?: boolean;
+  includeTags?: boolean;
 }
 
 export default defineEventHandler(async (event) => {
-  setupCloudinary();
-
-  const body = await readBody(event);
-  console.log(body);
-
-  const numPhotos = +body.numPhotos || 420;
-  const filterOutScreenshots =
-    body.filterOutScreenshots !== undefined ? body.filterOutScreenshots : true;
-  const onlyScreenshots =
-    body.onlyScreenshots !== undefined ? body.onlyScreenshots : false;
-  const onlyPhotoblog =
-    body.onlyPhotoblog !== undefined ? body.onlyPhotoblog : false;
-
-  // log out the config options
-  console.log("numPhotos: ", numPhotos);
-  console.log("filterOutScreenshots: ", filterOutScreenshots);
-  console.log("onlyScreenshots: ", onlyScreenshots);
-
   try {
-    console.log(
-      `Fetching the last ${numPhotos} photos uploaded to Cloudinary...`
-    );
+    const body: SearchRequestBody = await readBody(event);
+    
+    // Validate and set defaults
+    const numPhotos = Math.min(Math.max(Number(body.numPhotos) || 100, 1), 500); // Cloudinary max is 500
+    const filterOutScreenshots = body.filterOutScreenshots ?? true;
+    const onlyScreenshots = body.onlyScreenshots ?? false;
+    const onlyPhotoblog = body.onlyPhotoblog ?? false;
+    
+    // Validate mutually exclusive options
+    if (onlyScreenshots && filterOutScreenshots) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Cannot filter out screenshots and only show screenshots simultaneously"
+      });
+    }
 
-    // Fetch the last 100 images uploaded
-    const result = await cloudinary.search
-      .expression(
-        "resource_type:image" + (onlyPhotoblog ? " AND tags=photo-blog" : "")
-      )
-      .sort_by("uploaded_at", "desc")
-      .with_field("tags")
-      .with_field("metadata")
-      .with_field("context")
-      .max_results(numPhotos)
-      .execute();
+    console.log(`Fetching ${numPhotos} photos from Cloudinary...`);
 
-    // Helper function to identify screenshots
-    const isScreenshot = (resource: any) => {
+    // Build search expression
+    let expression = "resource_type:image";
+    if (onlyPhotoblog) {
+      expression += " AND tags=photo-blog";
+    }
+    if (onlyScreenshots) {
+      expression += " AND (tags=screenshot OR folder=screenshots)";
+    }
+    
+    // Create new search instance for each query (Cloudinary best practice)
+    const searchQuery = cloudinary.search
+      .expression(expression)
+      .sort_by("created_at", "desc") // Use created_at instead of uploaded_at
+      .max_results(numPhotos);
+    
+    // Conditionally add fields to reduce payload size
+    if (body.includeTags !== false) searchQuery.with_field("tags");
+    if (body.includeContext) searchQuery.with_field("context");
+    
+    const result = await searchQuery.execute();
+
+    // Optimized screenshot detection function
+    const isScreenshot = (resource: CloudinaryResource): boolean => {
       const tags = resource.tags || [];
-      const public_id = (resource.public_id || "").toLowerCase();
+      const publicId = resource.public_id.toLowerCase();
+      
+      // Check tags first (fastest)
+      if (tags.includes("screenshot")) return true;
+      
+      // Check public_id patterns
       return (
-        tags.includes("screenshot") ||
-        public_id.includes("screenshot") ||
-        public_id.includes("screen shot") ||
-        public_id.includes("screencap") ||
-        public_id.startsWith("screenshots/") ||
-        public_id.includes("/screenshots/")
+        publicId.includes("screenshot") ||
+        publicId.includes("screen shot") ||
+        publicId.includes("screencap") ||
+        publicId.startsWith("screenshots/") ||
+        publicId.includes("/screenshots/")
       );
     };
 
-    // Filter resources based on screenshot preferences
-    let filteredResources = result.resources.filter((resource: any) => {
-      const isScreenshotResource = isScreenshot(resource);
-      return (
-        (onlyScreenshots && isScreenshotResource) ||
-        (filterOutScreenshots && !isScreenshotResource) ||
-        (!filterOutScreenshots && !onlyScreenshots)
-      );
-    });
+    // Apply client-side filtering if needed (only if not handled in search expression)
+    let filteredResources = result.resources;
+    
+    if (!onlyScreenshots && filterOutScreenshots) {
+      filteredResources = result.resources.filter((resource: CloudinaryResource) => !isScreenshot(resource));
+    }
 
-    // Log results
-    console.log(
-      "Number of images eligible for return: ",
-      filteredResources.length
-    );
+    console.log(`Returning ${filteredResources.length} of ${result.resources.length} photos`);
 
-    // Create a simplified collection of information about the photos to send back to the client
-    const photos = filteredResources.map((resource: any) => ({
-      href: resource.secure_url,
-      public_id: resource.public_id,
-      uploaded_at: resource.created_at,
-      secure_url: resource.secure_url,
-      context: resource.context,
-      tags: resource.tags,
-      // Include any other fields we need
-      ...resource,
-    }));
-
-    return photos;
-  } catch (err) {
-    console.error("Error fetching photos from Cloudinary: ", err);
-    return { error: "An error occurred while fetching photos." };
-  }
-});
-
-// New function to fetch lite-info on all photos
-async function fetchLiteInfo() {
-  try {
-    const result = await cloudinary.api.resources({
-      type: "upload",
-      max_results: 500, // Adjust as needed, max is 500
-      resource_type: "image",
-      // Add any additional parameters for filtering or sorting if necessary
-    });
-
-    // Process the result to extract necessary lite-info
-    const liteInfo = result.resources.map((resource) => ({
+    // Create optimized response payload
+    const photos = filteredResources.map((resource: CloudinaryResource) => ({
       public_id: resource.public_id,
       secure_url: resource.secure_url,
       created_at: resource.created_at,
-      // Add any other relevant fields you want to include
+      ...(resource.tags && { tags: resource.tags }),
+      ...(resource.context && { context: resource.context }),
+      ...(resource.width && { width: resource.width }),
+      ...(resource.height && { height: resource.height }),
+      ...(resource.format && { format: resource.format })
     }));
 
-    return liteInfo;
-  } catch (err) {
-    console.error("Error fetching lite-info from Cloudinary: ", err);
-    return { error: "An error occurred while fetching lite-info." };
+    return photos;
+  } catch (error) {
+    console.error("Cloudinary API error:", error);
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Failed to fetch photos from Cloudinary",
+      data: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+});
+
+// Optimized function to fetch lite-info (unused function - consider removing)
+export async function fetchLiteInfo(maxResults = 500) {
+  try {
+    const result = await cloudinary.api.resources({
+      type: "upload",
+      max_results: Math.min(maxResults, 500), // Cloudinary max is 500
+      resource_type: "image",
+      sort_by: [["created_at", "desc"]]
+    });
+
+    return result.resources.map((resource: CloudinaryResource) => ({
+      public_id: resource.public_id,
+      secure_url: resource.secure_url,
+      created_at: resource.created_at
+    }));
+  } catch (error) {
+    console.error("Error fetching lite-info from Cloudinary:", error);
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Failed to fetch lite-info from Cloudinary"
+    });
   }
 }
-
-// Export the new function if needed
-export { fetchLiteInfo };

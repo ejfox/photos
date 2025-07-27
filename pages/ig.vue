@@ -1,37 +1,36 @@
 <template>
   <div
-    class="dark:bg-black dark:text-white h-screen overflow-y-auto snap-y snap-mandatory xl:snap-proximity overflow-x-hidden"
+    class="min-h-screen bg-white dark:bg-black dark:text-white overflow-y-auto snap-y snap-mandatory xl:snap-proximity overflow-x-hidden"
   >
-    <div
-      class="photo-list flex flex-wrap p-2 lg:px-4 items-center justify-left"
-    >
+    <div class="max-w-6xl mx-auto px-4 lg:px-8 py-8 lg:py-16">
       <div
-        v-for="photo in photos"
-        ref="photoRef"
-        class="photo-container bg-white dark:bg-black p-4"
+        class="photo-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-center justify-center"
       >
-        <NuxtLink
-          :to="`https://res.cloudinary.com/ejf/image/upload/t_ejf_photos_ig/{photo.public_id}`"
-        >
-          <!-- <LibraryPhoto :id="`${photo.public_id}`" :key="photo.public_id" :photo="photo" class="" /> -->
-
-          <!-- https://res.cloudinary.com/ejf/image/upload/t_ejfoxphotos-springsummer204/cld-sample.jpg -->
-
-          <img
-            :src="`https://res.cloudinary.com/ejf/image/upload/t_ejf_photos_ig/${photo.public_id}`"
-            :alt="photo.public_id"
-            class="cloudinary-img mx-auto my-0 h-96 w-auto rounded-sm"
-          />
-        </NuxtLink>
+        <div v-for="photo in photos" ref="photoRef" class="photo-container">
+          <NuxtLink
+            :to="`https://res.cloudinary.com/ejf/image/upload/t_ejf_photos_ig/${photo.public_id}`"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              :src="`https://res.cloudinary.com/ejf/image/upload/t_ejf_photos_ig/${photo.public_id}`"
+              :alt="photo.public_id"
+              class="cloudinary-img w-full h-auto rounded-sm transition-opacity hover:opacity-80"
+            />
+          </NuxtLink>
+        </div>
       </div>
 
-      <a href="https://ejfox.com" class="block p-2 lg:p-8">
-        <img
-          src="/handdrawn__MadeWithLove.svg"
-          class="dark:invert mx-auto my-8 lg:my-32"
-          alt="Made with love"
-        />
-      </a>
+      <!-- Footer -->
+      <div class="pt-16">
+        <a href="https://ejfox.com" class="block w-28 h-28 opacity-30 mx-auto">
+          <img
+            src="/handdrawn__MadeWithLove.svg"
+            class="dark:invert mx-auto"
+            alt="Made with love"
+          />
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -47,4 +46,3 @@ const { data: photos } = await useFetch("/api/cloudinary", {
 });
 </script>
 <style></style>
-

@@ -1,56 +1,77 @@
 <template>
-  <div class="pb-12">
+  <div class="min-h-screen bg-white dark:bg-black">
     <!-- we are gonna take the image and make it huge and in the background and very very blurry -->
-    <div ref="bgImage"
+    <div
+      ref="bgImage"
       class="bg-image absolute top-0 left-0 w-full h-full bg-cover -z-10 blur-3xl bg-center bg-no-repeat opacity-25"
       :style="{
         backgroundImage: `url(${smallBgImage(photo?.secure_url)})`,
-      }"></div>
+      }"
+    ></div>
 
     <!-- Back button -->
-    <div class="px-12 lg:px-24 py-2">
-      <NuxtLink :to="`/#photo-${photo?.public_id}`" variant="ghost"
-        class="text-xs font-mono tracking-tight opacity-50 hover:opacity-100 transition-opacity">
+    <div class="max-w-4xl mx-auto px-4 lg:px-8 py-4">
+      <NuxtLink
+        :to="`/#photo-${photo?.public_id}`"
+        variant="ghost"
+        class="text-xs font-mono tracking-tight opacity-50 hover:opacity-100 transition-opacity"
+      >
         ← Back to photos
       </NuxtLink>
     </div>
 
-    <div class="space-y-24">
-      <div class="px-4 lg:px-12 pb-12" :id="`photo-${photo.public_id}`">
-        <!-- Click opens the full-resolution Cloudinary asset in a new tab -->
+    <div class="space-y-16">
+      <!-- Main photo - centered and prominent -->
+      <div
+        class="max-w-5xl mx-auto px-4 lg:px-8"
+        :id="`photo-${photo.public_id}`"
+      >
         <a :href="photo?.secure_url" target="_blank" rel="noopener noreferrer">
           <LibraryPhoto :key="photo.public_id" :photo="photo" fullRes />
         </a>
       </div>
 
-      <div class="lg:flex flex-col items-center text-xs text-monospace">
-        <div class="px-12 lg:px-24 w-auto space-y-12">
-          <PhotoMetadata v-if="photo?.exifData" :photo="photo" />
-        </div>
+      <!-- Metadata section -->
+      <div class="max-w-4xl mx-auto px-4 lg:px-8">
+        <PhotoMetadata v-if="photo?.exifData" :photo="photo" />
+      </div>
 
-        <!-- map -->
-        <div v-if="false" ref="mapContainer"
-          class="map-container flex flex-col items-center w-full mt-24 lg:mt-0 lg:min-h-32 rounded-lg shadow-sm overflow-hidden relative md:opacity-20 hover:opacity-100 transition-opacity duration-200">
-          <div v-if="photo?.exifData?.GPSLatitude" class="flex flew-row">
-            <img class="lg:brightness-125 lg:contrast-125 lg:opacity-50"
-              :src="`https://api.mapbox.com/styles/v1/ejfox/${modeStyle}/static/${convertExifCoordinates(photo?.exifData.GPSLongitude, photo?.exifData.GPSLongitudeRef)},${convertExifCoordinates(photo?.exifData.GPSLatitude, photo?.exifData.GPSLatitudeRef)},4.5,0,0/${width}x${containerWidth}?access_token=pk.eyJ1IjoiZWpmb3giLCJhIjoiY2lyZjd0bXltMDA4b2dma3JzNnA0ajh1bSJ9.iCmlE7gmJubz2RtL4RFzIw`" />
-            <!-- write the lat/lng numbers big on top of both of the images -->
-            <div
-              class="coordinates absolute bottom-0 left-0 p-2 text-gray-700 dark:text-gray-300 w-full flex flex-col tracking-tighter leading-0 text-shadow-md">
-              <span class="text-3xl lg:text-sm white:bg-white/10 dark:bg-black/20 rounded-sm">{{
-                photo?.exifData.GPSLatitude }}
-                {{ photo?.exifData.GPSLatitudeRef }}</span>
-              <span class="text-3xl lg:text-sm">{{ photo?.exifData.GPSLongitude }}
-                {{ photo?.exifData.GPSLongitudeRef }}
-              </span>
-            </div>
+      <!-- map -->
+      <div
+        v-if="false"
+        ref="mapContainer"
+        class="map-container flex flex-col items-center w-full mt-16 lg:mt-0 lg:min-h-32 rounded-lg shadow-sm overflow-hidden relative md:opacity-20 hover:opacity-100 transition-opacity duration-200"
+      >
+        <div v-if="photo?.exifData?.GPSLatitude" class="flex flew-row">
+          <img
+            class="lg:brightness-125 lg:contrast-125 lg:opacity-50"
+            :src="`https://api.mapbox.com/styles/v1/ejfox/${modeStyle}/static/${convertExifCoordinates(photo?.exifData.GPSLongitude, photo?.exifData.GPSLongitudeRef)},${convertExifCoordinates(photo?.exifData.GPSLatitude, photo?.exifData.GPSLatitudeRef)},4.5,0,0/${width}x${containerWidth}?access_token=pk.eyJ1IjoiZWpmb3giLCJhIjoiY2lyZjd0bXltMDA4b2dma3JzNnA0ajh1bSJ9.iCmlE7gmJubz2RtL4RFzIw`"
+          />
+          <!-- write the lat/lng numbers big on top of both of the images -->
+          <div
+            class="coordinates absolute bottom-0 left-0 p-2 text-gray-700 dark:text-gray-300 w-full flex flex-col tracking-tighter leading-0 text-shadow-md"
+          >
+            <span
+              class="text-3xl lg:text-sm white:bg-white/10 dark:bg-black/20 rounded-sm"
+              >{{ photo?.exifData.GPSLatitude }}
+              {{ photo?.exifData.GPSLatitudeRef }}</span
+            >
+            <span class="text-3xl lg:text-sm"
+              >{{ photo?.exifData.GPSLongitude }}
+              {{ photo?.exifData.GPSLongitudeRef }}
+            </span>
           </div>
         </div>
       </div>
 
-      <div class="px-12 lg:px-24">
+      <!-- Footer -->
+      <div class="max-w-4xl mx-auto px-4 lg:px-8 pb-16">
         <a href="https://ejfox.com" class="block w-28 h-28 opacity-30 mx-auto">
-          <img src="/handdrawn__MadeWithLove.svg" class="dark:invert mx-auto" alt="Made with love" />
+          <img
+            src="/handdrawn__MadeWithLove.svg"
+            class="dark:invert mx-auto"
+            alt="Made with love"
+          />
         </a>
       </div>
     </div>

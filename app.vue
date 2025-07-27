@@ -4,11 +4,10 @@
   </div>
 </template>
 
-<script setup>
-</script>
+<script setup></script>
 
 <style>
 .text-monospace {
-  font-family: 'Fira Code', monospace;
+  font-family: "Fira Code", monospace;
 }
 </style>
