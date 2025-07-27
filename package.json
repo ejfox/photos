@@ -17,10 +17,8 @@
   "dependencies": {
     "@nuxt/ui": "^2.16.0",
     "@nuxtjs/google-fonts": "^3.2.0",
-    "@nuxtjs/supabase": "^1.2.2",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@pinia/nuxt": "^0.5.1",
-    "@supabase/supabase-js": "^2.43.1",
     "@turf/turf": "^6.5.0",
     "@types/chance": "^1.1.6",
     "@types/d3": "^7.4.3",

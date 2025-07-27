@@ -29,16 +29,6 @@ export default defineNuxtConfig({
   ],
 
   modules: [
-    [
-      "@nuxtjs/supabase",
-      {
-        redirectOptions: {
-          // exclude: ["/", "/ig", ],
-          exclude: ["/*"],
-          include: ["/admin", "/screenshots"],
-        },
-      },
-    ],
     "@vueuse/nuxt",
     "@pinia/nuxt",
     "@vueuse/nuxt",
