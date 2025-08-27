@@ -32,11 +32,11 @@ if [ ! -f .env ]; then
         cp .env.example .env
         echo "✅ Created .env file from .env.example"
         echo "⚠️  Please edit .env with your actual values before continuing."
-        echo "   Required variables: SUPABASE_URL, SUPABASE_KEY, CLOUDINARY_*, OPENAI_API_KEY"
+        echo "   Required variables: CLOUDINARY_*, OPENAI_API_KEY"
         read -p "Press enter when you've configured .env file..."
     else
         echo "❌ .env.example not found. Please create .env manually."
-        echo "   Required variables: SUPABASE_URL, SUPABASE_KEY, CLOUDINARY_*, OPENAI_API_KEY"
+        echo "   Required variables: CLOUDINARY_*, OPENAI_API_KEY"
         exit 1
     fi
 fi

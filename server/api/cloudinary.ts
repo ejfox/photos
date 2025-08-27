@@ -16,7 +16,6 @@ if (!cloudinary.config().cloud_name) {
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
   }
-  console.log("Cloudinary configured");
 }
 
 interface CloudinaryResource {
@@ -63,7 +62,6 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    console.log(`Fetching ${numPhotos} photos from Cloudinary...`);
 
     // Build search expression
     let expression = "resource_type:image";
@@ -111,7 +109,6 @@ export default defineEventHandler(async (event) => {
       filteredResources = result.resources.filter((resource: CloudinaryResource) => !isScreenshot(resource));
     }
 
-    console.log(`Returning ${filteredResources.length} of ${result.resources.length} photos`);
 
     // Create optimized response payload
     const photos = filteredResources.map((resource: CloudinaryResource) => ({

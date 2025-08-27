@@ -86,7 +86,9 @@ export default defineEventHandler(async (event): Promise<PhotoStats> => {
   const exifPromises = photos.map((photo) =>
     $fetch("/api/cloudinary-exif", {
       method: "POST",
-      body: { resourceId: photo.public_id },
+      body: { publicId: photo.public_id },
+    }).catch(err => {
+      return null; // Silently handle EXIF failures (common for screenshots)
     }),
   );
 
